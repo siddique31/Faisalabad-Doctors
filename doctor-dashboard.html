@@ -6,7 +6,6 @@
     <title>Doctor Dashboard - Gojra Doctors</title>
     <link rel="stylesheet" href="css/style.css">
     <style>
-        /* Profile Styles */
         .profile-card {
             background: white;
             border-radius: 15px;
@@ -14,81 +13,42 @@
             box-shadow: 0 5px 20px rgba(0,0,0,0.05);
             max-width: 650px;
         }
-        .profile-card h3 {
-            margin-bottom: 20px;
-            color: var(--primary);
-        }
-        .profile-info p {
-            margin-bottom: 12px;
-            padding: 10px;
-            background: var(--gray-50);
-            border-radius: 8px;
-        }
-        .profile-info strong {
-            display: inline-block;
-            width: 130px;
-            color: var(--gray-800);
-        }
-        .edit-form {
-            display: none;
-        }
-        .edit-form.active {
-            display: block;
-        }
-        .profile-view.hidden {
-            display: none;
-        }
-        
-        /* Photo Styles */
+        .profile-card h3 { margin-bottom: 20px; color: var(--primary); }
+        .profile-info p { margin-bottom: 12px; padding: 10px; background: var(--gray-50); border-radius: 8px; }
+        .profile-info strong { display: inline-block; width: 130px; color: var(--gray-800); }
+        .edit-form { display: none; }
+        .edit-form.active { display: block; }
+        .profile-view.hidden { display: none; }
         .profile-photo-large {
-            width: 130px;
-            height: 130px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 4px solid var(--primary);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-            transition: all 0.3s ease;
+            width: 130px; height: 130px; border-radius: 50%;
+            object-fit: cover; border: 4px solid var(--primary);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2); transition: all 0.3s ease;
         }
-        .profile-photo-large:hover {
-            transform: scale(1.05);
-        }
+        .profile-photo-large:hover { transform: scale(1.05); }
         .edit-photo-preview {
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 3px dashed var(--gray-300);
-            transition: all 0.3s ease;
-            cursor: pointer;
+            width: 120px; height: 120px; border-radius: 50%;
+            object-fit: cover; border: 3px dashed var(--gray-300);
+            transition: all 0.3s ease; cursor: pointer;
         }
-        .edit-photo-preview:hover {
-            opacity: 0.8;
-        }
-        
-        /* Empty State */
+        .edit-photo-preview:hover { opacity: 0.8; }
         .empty-state {
-            text-align: center;
-            padding: 50px 20px;
-            background: var(--white);
-            border-radius: 15px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            text-align: center; padding: 50px 20px; background: var(--white);
+            border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);
         }
-        .empty-state .icon {
-            font-size: 60px;
-            margin-bottom: 15px;
+        .empty-state .icon { font-size: 60px; margin-bottom: 15px; }
+        .empty-state h3 { color: var(--gray-700); margin-bottom: 10px; }
+        .empty-state p { color: var(--gray-500); }
+        .btn-audio {
+            background: #8b5cf6;
+            color: white;
         }
-        .empty-state h3 {
-            color: var(--gray-700);
-            margin-bottom: 10px;
-        }
-        .empty-state p {
-            color: var(--gray-500);
+        .btn-audio:hover {
+            background: #7c3aed;
         }
     </style>
 </head>
 <body>
     
-    <!-- Header -->
     <header class="header">
         <nav class="navbar">
             <div class="logo">
@@ -102,10 +62,8 @@
         </nav>
     </header>
 
-    <!-- Main Dashboard -->
     <main class="dashboard">
         
-        <!-- Sidebar -->
         <div class="dashboard-sidebar">
             <div class="sidebar-menu">
                 <a href="#" class="sidebar-link active" onclick="showSection('appointments')">📅 Appointments</a>
@@ -115,12 +73,11 @@
             </div>
         </div>
 
-        <!-- Content -->
         <div class="dashboard-content">
             
             <!-- Appointments Section -->
             <div id="appointmentsSection" class="dashboard-section">
-                <h2>📅 Today's Appointments</h2>
+                <h2>📅 Appointments</h2>
                 <div id="appointmentsList">
                     <p>Loading appointments...</p>
                 </div>
@@ -169,28 +126,17 @@
             <!-- Profile Section -->
             <div id="profileSection" class="dashboard-section" style="display: none;">
                 <h2>👤 My Profile</h2>
-                
                 <div class="profile-card">
-                    
-                    <!-- VIEW MODE -->
                     <div class="profile-view" id="profileView">
                         <div style="text-align: center; margin-bottom: 20px;">
                             <img id="profilePhotoLarge" src="https://via.placeholder.com/150" alt="Profile Photo" class="profile-photo-large">
                             <p style="margin-top: 10px; font-size: 12px; color: #666;">Profile Photo</p>
                         </div>
-                        <div class="profile-info" id="profileInfo">
-                            <p>Loading profile...</p>
-                        </div>
-                        <button onclick="enableEdit()" class="btn btn-primary" style="margin-top: 20px; width: 100%;">
-                            ✏️ Edit Profile
-                        </button>
+                        <div class="profile-info" id="profileInfo"><p>Loading profile...</p></div>
+                        <button onclick="enableEdit()" class="btn btn-primary" style="margin-top: 20px; width: 100%;">✏️ Edit Profile</button>
                     </div>
-                    
-                    <!-- EDIT MODE -->
                     <div class="edit-form" id="editForm">
                         <h3 style="text-align: center; margin-bottom: 20px;">✏️ Edit Your Profile</h3>
-                        
-                        <!-- Profile Photo Upload -->
                         <div class="input-group" style="text-align: center;">
                             <label style="font-size: 16px; font-weight: 700;">Profile Photo</label>
                             <div style="margin: 15px 0;">
@@ -200,25 +146,9 @@
                             <small style="color: #666; display: block; margin-top: 5px;">📸 Upload photo (JPG, PNG - Max 500KB)</small>
                             <button onclick="removePhoto()" type="button" style="background: none; border: none; color: #ef4444; cursor: pointer; margin-top: 5px; font-size: 12px;">🗑️ Remove Photo</button>
                         </div>
-                        
                         <hr style="margin: 20px 0; border: none; border-top: 1px solid var(--gray-200);">
-                        
-                        <!-- Full Name -->
-                        <div class="input-group">
-                            <label>Full Name *</label>
-                            <input type="text" id="editName" placeholder="Dr. Name">
-                        </div>
-                        
-                        <!-- Phone -->
-                        <div class="input-group">
-                            <label>Phone Number *</label>
-                            <div class="phone-input">
-                                <span class="country-code">+92</span>
-                                <input type="tel" id="editPhone" placeholder="3XX-XXXXXXX" maxlength="10">
-                            </div>
-                        </div>
-                        
-                        <!-- Specialty -->
+                        <div class="input-group"><label>Full Name *</label><input type="text" id="editName" placeholder="Dr. Name"></div>
+                        <div class="input-group"><label>Phone Number *</label><div class="phone-input"><span class="country-code">+92</span><input type="tel" id="editPhone" placeholder="3XX-XXXXXXX" maxlength="10"></div></div>
                         <div class="input-group">
                             <label>Specialty *</label>
                             <select id="editSpecialty" onchange="checkEditOtherSpecialty()">
@@ -239,119 +169,60 @@
                                 <option value="other">📝 Other (Write Below)</option>
                             </select>
                         </div>
-                        
                         <div class="input-group" id="editOtherSpecialtyGroup" style="display: none;">
                             <label>Please Specify Your Specialty *</label>
                             <input type="text" id="editOtherSpecialty" placeholder="Write your specialty here...">
                         </div>
-                        
-                        <!-- Qualification -->
-                        <div class="input-group">
-                            <label>Qualification *</label>
-                            <input type="text" id="editQualification" placeholder="e.g., MBBS, FCPS">
-                        </div>
-                        
-                        <!-- Experience -->
-                        <div class="input-group">
-                            <label>Experience (Years)</label>
-                            <input type="number" id="editExperience" placeholder="e.g., 10" min="0">
-                        </div>
-                        
-                        <!-- Fee -->
-                        <div class="input-group">
-                            <label>Consultation Fee (Rs.) *</label>
-                            <input type="number" id="editFee" placeholder="e.g., 500" min="100">
-                        </div>
-                        
-                        <!-- Password -->
-                        <div class="input-group">
-                            <label>New Password (leave blank to keep current)</label>
-                            <input type="password" id="editPassword" placeholder="Min 6 characters" minlength="6">
-                        </div>
-                        
-                        <!-- Buttons -->
+                        <div class="input-group"><label>Qualification *</label><input type="text" id="editQualification" placeholder="e.g., MBBS, FCPS"></div>
+                        <div class="input-group"><label>Experience (Years)</label><input type="number" id="editExperience" placeholder="e.g., 10" min="0"></div>
+                        <div class="input-group"><label>Consultation Fee (Rs.) *</label><input type="number" id="editFee" placeholder="e.g., 500" min="100"></div>
+                        <div class="input-group"><label>New Password (leave blank)</label><input type="password" id="editPassword" placeholder="Min 6 characters" minlength="6"></div>
                         <div style="display: flex; gap: 10px; margin-top: 25px;">
-                            <button onclick="saveProfile()" class="btn btn-primary" id="saveBtn" style="flex: 2;">
-                                💾 Save Changes
-                            </button>
-                            <button onclick="cancelEdit()" class="btn btn-outline" style="flex: 1;">
-                                ❌ Cancel
-                            </button>
+                            <button onclick="saveProfile()" class="btn btn-primary" id="saveBtn" style="flex: 2;">💾 Save Changes</button>
+                            <button onclick="cancelEdit()" class="btn btn-outline" style="flex: 1;">❌ Cancel</button>
                         </div>
                     </div>
-                    
                 </div>
             </div>
 
         </div>
     </main>
 
-    <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
-    
-    <!-- Firebase Config -->
     <script src="js/firebase-config.js"></script>
     
-    <!-- JavaScript -->
     <script>
-        // ==========================================
-        // DOCTOR DASHBOARD - COMPLETE JAVASCRIPT
-        // ==========================================
-        
         var currentDoctorId = '';
         var currentDoctorData = {};
 
-        // ==================== AUTH CHECK ====================
-        
         firebase.auth().onAuthStateChanged(function(user) {
-            if (!user) {
-                window.location.href = 'doctor-login.html';
-                return;
-            }
+            if (!user) { window.location.href = 'doctor-login.html'; return; }
             currentDoctorId = user.uid;
-            console.log('Doctor logged in. ID:', currentDoctorId);
-            
             loadDoctorData(user);
             loadAppointments();
         });
 
-        // ==================== LOAD DOCTOR DATA ====================
-        
         function loadDoctorData(user) {
             db.collection('doctors').doc(user.uid).get()
                 .then(function(doc) {
                     if (doc.exists) {
                         currentDoctorData = doc.data();
-                        var nameElement = document.getElementById('doctorNameDisplay');
-                        if (nameElement) {
-                            nameElement.textContent = 'Dr. ' + currentDoctorData.name;
-                        }
-                        console.log('Doctor data loaded:', currentDoctorData.name);
+                        document.getElementById('doctorNameDisplay').textContent = 'Dr. ' + currentDoctorData.name;
                     } else {
-                        console.error('Doctor document not found!');
-                        alert('Your profile is not set up. Please register again.');
+                        alert('Profile not found. Please register again.');
                         firebase.auth().signOut();
                         window.location.href = 'doctor-login.html';
                     }
-                })
-                .catch(function(error) {
-                    console.error('Error loading doctor data:', error);
                 });
         }
 
-        // ==================== LOAD APPOINTMENTS ====================
+        // ==================== LOAD APPOINTMENTS WITH CONFIRM/CANCEL ====================
         
         function loadAppointments() {
             var list = document.getElementById('appointmentsList');
-            
-            if (!list) return;
-            
-            if (!currentDoctorId) {
-                list.innerHTML = '<div class="empty-state"><div class="icon">⚠️</div><h3>Session Expired</h3><p>Please login again.</p></div>';
-                return;
-            }
+            if (!list || !currentDoctorId) return;
             
             list.innerHTML = '<p style="text-align: center; padding: 30px;">⏳ Loading appointments...</p>';
             
@@ -360,16 +231,8 @@
                 .orderBy('createdAt', 'desc')
                 .get()
                 .then(function(snapshot) {
-                    console.log('Appointments found:', snapshot.size);
-                    
                     if (snapshot.empty) {
-                        list.innerHTML = `
-                            <div class="empty-state">
-                                <div class="icon">📭</div>
-                                <h3>No Appointments Yet</h3>
-                                <p>When patients book appointments with you, they will appear here.</p>
-                            </div>
-                        `;
+                        list.innerHTML = '<div class="empty-state"><div class="icon">📭</div><h3>No Appointments Yet</h3><p>When patients book appointments, they will appear here.</p></div>';
                         return;
                     }
                     
@@ -398,6 +261,50 @@
                                         <span class="status ${statusClass}">${status.toUpperCase()}</span>
                                     </div>
                                 </div>
+                                
+                                <!-- Pending: Show Confirm/Cancel Buttons -->
+                                ${status === 'pending' ? `
+                                    <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #eee; display: flex; gap: 10px;">
+                                        <button onclick="updateAppointmentStatus('${appointmentId}', 'confirmed')" class="btn btn-success" style="flex: 1;">
+                                            ✅ Confirm
+                                        </button>
+                                        <button onclick="updateAppointmentStatus('${appointmentId}', 'cancelled')" class="btn btn-danger" style="flex: 1;">
+                                            ❌ Cancel
+                                        </button>
+                                    </div>
+                                ` : ''}
+                                
+                                <!-- Confirmed: Show Video Call + Audio Call Buttons -->
+                                ${status === 'confirmed' ? `
+                                    <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #eee;">
+                                        <p style="color: var(--success); text-align: center; font-weight: 600; margin-bottom: 10px;">✅ Confirmed</p>
+                                        <div style="display: flex; gap: 10px;">
+                                            <a href="video-call.html?id=${appointmentId}" class="btn btn-primary" style="flex: 1;">
+                                                🎥 Video Call
+                                            </a>
+                                            <a href="audio-call.html?id=${appointmentId}" class="btn btn-audio" style="flex: 1;">
+                                                📞 Audio Call
+                                            </a>
+                                        </div>
+                                        <button onclick="updateAppointmentStatus('${appointmentId}', 'completed')" class="btn btn-outline btn-full" style="margin-top: 10px;">
+                                            ✅ Mark as Completed
+                                        </button>
+                                    </div>
+                                ` : ''}
+                                
+                                <!-- Cancelled -->
+                                ${status === 'cancelled' ? `
+                                    <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #eee;">
+                                        <p style="color: var(--danger); text-align: center;">❌ Cancelled</p>
+                                    </div>
+                                ` : ''}
+                                
+                                <!-- Completed -->
+                                ${status === 'completed' ? `
+                                    <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #eee;">
+                                        <p style="color: var(--info); text-align: center;">✅ Completed</p>
+                                    </div>
+                                ` : ''}
                             </div>
                         `;
                     });
@@ -405,252 +312,158 @@
                     list.innerHTML = html;
                 })
                 .catch(function(error) {
-                    console.error('Error loading appointments:', error);
-                    list.innerHTML = `
-                        <div class="empty-state" style="border: 1px solid #fca5a5;">
-                            <div class="icon">❌</div>
-                            <h3>Error Loading Appointments</h3>
-                            <p style="color: #991b1b; font-size: 12px;">${error.message}</p>
-                            <button onclick="loadAppointments()" class="btn btn-outline" style="margin-top: 15px;">🔄 Try Again</button>
-                        </div>
-                    `;
+                    list.innerHTML = '<div class="empty-state" style="border: 1px solid #fca5a5;"><div class="icon">❌</div><h3>Error</h3><p>'+error.message+'</p><button onclick="loadAppointments()" class="btn btn-outline">🔄 Try Again</button></div>';
                 });
         }
 
-        // ==================== SCHEDULE FUNCTIONS ====================
+        // ==================== UPDATE APPOINTMENT STATUS ====================
         
-        function addSchedule() {
-            var day = document.getElementById('day').value;
-            var startTime = document.getElementById('startTime').value;
-            var endTime = document.getElementById('endTime').value;
+        function updateAppointmentStatus(appointmentId, newStatus) {
+            var msg = newStatus === 'confirmed' ? 'Confirm this appointment?' :
+                      newStatus === 'cancelled' ? 'Cancel this appointment?' :
+                      'Mark this appointment as completed?';
             
-            if (!startTime || !endTime) {
-                alert('Please select both start and end time');
-                return;
-            }
+            if (!confirm(msg)) return;
             
-            db.collection('doctors').doc(currentDoctorId).collection('schedule').add({
-                day: day,
-                startTime: startTime,
-                endTime: endTime,
-                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            db.collection('appointments').doc(appointmentId).update({
+                status: newStatus,
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
             })
             .then(function() {
-                alert('Schedule added!');
-                loadSchedule();
-                document.getElementById('startTime').value = '';
-                document.getElementById('endTime').value = '';
+                alert('Appointment ' + newStatus + ' successfully!');
+                loadAppointments();
             })
             .catch(function(error) {
                 alert('Error: ' + error.message);
             });
         }
 
+        // ==================== SCHEDULE ====================
+        
+        function addSchedule() {
+            var day = document.getElementById('day').value;
+            var startTime = document.getElementById('startTime').value;
+            var endTime = document.getElementById('endTime').value;
+            if (!startTime || !endTime) { alert('Please select time'); return; }
+            
+            db.collection('doctors').doc(currentDoctorId).collection('schedule').add({
+                day: day, startTime: startTime, endTime: endTime,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            })
+            .then(function() { alert('Schedule added!'); loadSchedule(); })
+            .catch(function(error) { alert('Error: ' + error.message); });
+        }
+
         function loadSchedule() {
             var list = document.getElementById('scheduleList');
             if (!list) return;
             
-            db.collection('doctors').doc(currentDoctorId).collection('schedule')
-                .orderBy('createdAt', 'asc')
-                .get()
+            db.collection('doctors').doc(currentDoctorId).collection('schedule').orderBy('createdAt', 'asc').get()
                 .then(function(snapshot) {
-                    if (snapshot.empty) {
-                        list.innerHTML = '<div class="empty-state"><div class="icon">📅</div><h3>No Schedule Set</h3><p>Add your availability above.</p></div>';
-                        return;
-                    }
-                    
-                    var html = '<h3 style="margin-bottom: 15px;">📋 My Weekly Schedule:</h3>';
-                    
+                    if (snapshot.empty) { list.innerHTML = '<div class="empty-state"><div class="icon">📅</div><h3>No Schedule</h3></div>'; return; }
+                    var html = '<h3>My Schedule:</h3>';
                     snapshot.forEach(function(doc) {
-                        var data = doc.data();
-                        html += `
-                            <div style="display: flex; justify-content: space-between; align-items: center; background: white; padding: 12px 15px; border-radius: 8px; margin-bottom: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
-                                <span><strong>${data.day}</strong>: ${data.startTime} - ${data.endTime}</span>
-                                <button onclick="deleteSchedule('${doc.id}')" style="background: none; border: none; color: #ef4444; cursor: pointer; font-size: 16px;">🗑️</button>
-                            </div>
-                        `;
+                        var d = doc.data();
+                        html += '<div style="display:flex;justify-content:space-between;background:white;padding:10px;border-radius:8px;margin-bottom:5px;"><span><strong>'+d.day+'</strong>: '+d.startTime+' - '+d.endTime+'</span><button onclick="deleteSchedule(\''+doc.id+'\')" style="border:none;background:none;color:red;cursor:pointer;">🗑️</button></div>';
                     });
-                    
                     list.innerHTML = html;
                 });
         }
 
         function deleteSchedule(scheduleId) {
-            if (confirm('Delete this schedule?')) {
+            if (confirm('Delete?')) {
                 db.collection('doctors').doc(currentDoctorId).collection('schedule').doc(scheduleId).delete()
-                    .then(function() {
-                        alert('Schedule deleted!');
-                        loadSchedule();
-                    });
+                    .then(function() { loadSchedule(); });
             }
         }
 
         // ==================== EARNINGS ====================
         
         function loadEarnings() {
-            var earningsElement = document.getElementById('totalEarnings');
-            if (!earningsElement) return;
-            
-            db.collection('appointments')
-                .where('doctorId', '==', currentDoctorId)
-                .where('status', '==', 'completed')
-                .get()
+            var el = document.getElementById('totalEarnings');
+            if (!el) return;
+            db.collection('appointments').where('doctorId', '==', currentDoctorId).where('status', '==', 'completed').get()
                 .then(function(snapshot) {
-                    var totalEarnings = 0;
-                    snapshot.forEach(function(doc) {
-                        totalEarnings += (doc.data().fee || 0);
-                    });
-                    earningsElement.textContent = 'Rs. ' + totalEarnings.toLocaleString();
+                    var total = 0;
+                    snapshot.forEach(function(doc) { total += (doc.data().fee || 0); });
+                    el.textContent = 'Rs. ' + total.toLocaleString();
                 });
         }
 
         // ==================== SECTION SWITCHING ====================
         
         function showSection(section) {
-            var sections = document.querySelectorAll('.dashboard-section');
-            sections.forEach(function(s) {
-                s.style.display = 'none';
-            });
-            
-            var links = document.querySelectorAll('.sidebar-link');
-            links.forEach(function(l) {
-                l.classList.remove('active');
-            });
-            
-            var targetSection = document.getElementById(section + 'Section');
-            if (targetSection) {
-                targetSection.style.display = 'block';
-            }
-            
-            if (event && event.target) {
-                event.target.classList.add('active');
-            }
-            
+            document.querySelectorAll('.dashboard-section').forEach(function(s) { s.style.display = 'none'; });
+            document.querySelectorAll('.sidebar-link').forEach(function(l) { l.classList.remove('active'); });
+            document.getElementById(section + 'Section').style.display = 'block';
+            event.target.classList.add('active');
             if (section === 'appointments') loadAppointments();
             if (section === 'schedule') loadSchedule();
             if (section === 'earnings') loadEarnings();
             if (section === 'profile') loadProfile();
         }
 
-        // ==================== PROFILE FUNCTIONS ====================
+        // ==================== PROFILE ====================
         
         function loadProfile() {
-            db.collection('doctors').doc(currentDoctorId).get()
-                .then(function(doc) {
-                    if (doc.exists) {
-                        currentDoctorData = doc.data();
-                        var data = currentDoctorData;
-                        
-                        // Show large photo
-                        var photoLarge = document.getElementById('profilePhotoLarge');
-                        if (photoLarge) {
-                            photoLarge.src = data.photoURL || 'https://via.placeholder.com/150?text=No+Photo';
-                        }
-                        
-                        // Show edit preview photo
-                        var editPreview = document.getElementById('editPhotoPreviewImg');
-                        if (editPreview) {
-                            editPreview.src = data.photoURL || 'https://via.placeholder.com/150?text=No+Photo';
-                        }
-                        
-                        // Show profile info
-                        var profileInfo = document.getElementById('profileInfo');
-                        if (profileInfo) {
-                            profileInfo.innerHTML = `
-                                <p><strong>Name:</strong> Dr. ${data.name || ''}</p>
-                                <p><strong>Email:</strong> ${data.email || ''}</p>
-                                <p><strong>Phone:</strong> ${data.phone || 'N/A'}</p>
-                                <p><strong>Specialty:</strong> ${data.specialty || ''}</p>
-                                <p><strong>Qualification:</strong> ${data.qualification || ''}</p>
-                                <p><strong>PMDC:</strong> ${data.pmdcNumber || ''}</p>
-                                <p><strong>Experience:</strong> ${data.experience || '0'} years</p>
-                                <p><strong>Fee:</strong> Rs. ${data.fee || '0'}</p>
-                                <p><strong>Status:</strong> ${data.isApproved ? '✅ Approved' : '⏳ Pending Approval'}</p>
-                            `;
-                        }
-                        
-                        // Fill edit form
-                        document.getElementById('editName').value = data.name || '';
-                        document.getElementById('editPhone').value = (data.phone || '').replace('+92', '');
-                        document.getElementById('editQualification').value = data.qualification || '';
-                        document.getElementById('editExperience').value = data.experience || '';
-                        document.getElementById('editFee').value = data.fee || '';
-                        document.getElementById('editPassword').value = '';
-                        document.getElementById('editPhoto').value = '';
-                        window._removePhoto = false;
-                        
-                        // Set specialty
-                        var specialtySelect = document.getElementById('editSpecialty');
-                        var currentSpecialty = data.specialty || '';
-                        var options = specialtySelect.options;
-                        var found = false;
-                        
-                        for (var i = 0; i < options.length; i++) {
-                            if (options[i].value === currentSpecialty) {
-                                found = true;
-                                break;
-                            }
-                        }
-                        
-                        if (found) {
-                            specialtySelect.value = currentSpecialty;
-                            document.getElementById('editOtherSpecialtyGroup').style.display = 'none';
-                        } else if (currentSpecialty) {
-                            specialtySelect.value = 'other';
-                            document.getElementById('editOtherSpecialtyGroup').style.display = 'block';
-                            document.getElementById('editOtherSpecialty').value = currentSpecialty;
-                        } else {
-                            document.getElementById('editOtherSpecialtyGroup').style.display = 'none';
-                        }
+            db.collection('doctors').doc(currentDoctorId).get().then(function(doc) {
+                if (doc.exists) {
+                    currentDoctorData = doc.data();
+                    var d = currentDoctorData;
+                    document.getElementById('profilePhotoLarge').src = d.photoURL || 'https://via.placeholder.com/150?text=No+Photo';
+                    document.getElementById('editPhotoPreviewImg').src = d.photoURL || 'https://via.placeholder.com/150?text=No+Photo';
+                    document.getElementById('profileInfo').innerHTML = `
+                        <p><strong>Name:</strong> Dr. ${d.name||''}</p>
+                        <p><strong>Email:</strong> ${d.email||''}</p>
+                        <p><strong>Phone:</strong> ${d.phone||'N/A'}</p>
+                        <p><strong>Specialty:</strong> ${d.specialty||''}</p>
+                        <p><strong>Qualification:</strong> ${d.qualification||''}</p>
+                        <p><strong>PMDC:</strong> ${d.pmdcNumber||''}</p>
+                        <p><strong>Experience:</strong> ${d.experience||'0'} years</p>
+                        <p><strong>Fee:</strong> Rs. ${d.fee||'0'}</p>
+                        <p><strong>Status:</strong> ${d.isApproved?'✅ Approved':'⏳ Pending'}</p>`;
+                    document.getElementById('editName').value = d.name||'';
+                    document.getElementById('editPhone').value = (d.phone||'').replace('+92','');
+                    document.getElementById('editQualification').value = d.qualification||'';
+                    document.getElementById('editExperience').value = d.experience||'';
+                    document.getElementById('editFee').value = d.fee||'';
+                    document.getElementById('editPassword').value = '';
+                    document.getElementById('editPhoto').value = '';
+                    window._removePhoto = false;
+                    
+                    var sel = document.getElementById('editSpecialty');
+                    var found = false;
+                    for (var i=0; i<sel.options.length; i++) {
+                        if (sel.options[i].value === d.specialty) { found = true; break; }
                     }
-                })
-                .catch(function(error) {
-                    console.error('Error loading profile:', error);
-                });
+                    if (found) {
+                        sel.value = d.specialty||'';
+                        document.getElementById('editOtherSpecialtyGroup').style.display = 'none';
+                    } else if (d.specialty) {
+                        sel.value = 'other';
+                        document.getElementById('editOtherSpecialtyGroup').style.display = 'block';
+                        document.getElementById('editOtherSpecialty').value = d.specialty;
+                    }
+                }
+            });
         }
 
         function checkEditOtherSpecialty() {
-            var specialty = document.getElementById('editSpecialty').value;
-            var otherGroup = document.getElementById('editOtherSpecialtyGroup');
-            
-            if (specialty === 'other') {
-                otherGroup.style.display = 'block';
-            } else {
-                otherGroup.style.display = 'none';
-                document.getElementById('editOtherSpecialty').value = '';
-            }
+            var g = document.getElementById('editOtherSpecialtyGroup');
+            g.style.display = document.getElementById('editSpecialty').value === 'other' ? 'block' : 'none';
         }
 
         function previewEditPhoto() {
             var file = document.getElementById('editPhoto').files[0];
-            var preview = document.getElementById('editPhotoPreviewImg');
-            
-            if (!file) {
-                preview.src = currentDoctorData.photoURL || 'https://via.placeholder.com/150?text=No+Photo';
-                return;
-            }
-            
-            if (file.size > 500 * 1024) {
-                alert('File too large! Max 500KB.');
-                document.getElementById('editPhoto').value = '';
-                return;
-            }
-            
-            if (!file.type.startsWith('image/')) {
-                alert('Please select an image file (JPG, PNG).');
-                document.getElementById('editPhoto').value = '';
-                return;
-            }
-            
-            var reader = new FileReader();
-            reader.onload = function(e) {
-                preview.src = e.target.result;
-            };
-            reader.readAsDataURL(file);
+            if (!file) return;
+            if (file.size > 500*1024) { alert('Too large!'); return; }
+            var r = new FileReader();
+            r.onload = function(e) { document.getElementById('editPhotoPreviewImg').src = e.target.result; };
+            r.readAsDataURL(file);
         }
 
         function removePhoto() {
-            if (confirm('Remove your profile photo?')) {
+            if (confirm('Remove photo?')) {
                 document.getElementById('editPhoto').value = '';
                 document.getElementById('editPhotoPreviewImg').src = 'https://via.placeholder.com/150?text=No+Photo';
                 window._removePhoto = true;
@@ -660,7 +473,6 @@
         function enableEdit() {
             document.getElementById('profileView').classList.add('hidden');
             document.getElementById('editForm').classList.add('active');
-            window._removePhoto = false;
         }
 
         function cancelEdit() {
@@ -671,114 +483,56 @@
 
         function saveProfile() {
             var user = firebase.auth().currentUser;
-            if (!user) {
-                alert('Session expired. Please login again.');
-                return;
-            }
-
+            if (!user) return;
             var name = document.getElementById('editName').value.trim();
             var phone = document.getElementById('editPhone').value.trim();
-            var specialtySelect = document.getElementById('editSpecialty').value;
-            var qualification = document.getElementById('editQualification').value.trim();
-            var experience = document.getElementById('editExperience').value;
+            var spec = document.getElementById('editSpecialty').value;
+            var qual = document.getElementById('editQualification').value.trim();
+            var exp = document.getElementById('editExperience').value;
             var fee = document.getElementById('editFee').value;
-            var newPassword = document.getElementById('editPassword').value;
-            var photoFile = document.getElementById('editPhoto').files[0];
-
-            // Handle "other" specialty
-            var finalSpecialty = specialtySelect;
-            if (specialtySelect === 'other') {
-                finalSpecialty = document.getElementById('editOtherSpecialty').value.trim();
-                if (!finalSpecialty) {
-                    alert('Please write your specialty');
-                    return;
-                }
+            var pass = document.getElementById('editPassword').value;
+            var photo = document.getElementById('editPhoto').files[0];
+            
+            var finalSpec = spec;
+            if (spec === 'other') {
+                finalSpec = document.getElementById('editOtherSpecialty').value.trim();
+                if (!finalSpec) { alert('Write specialty'); return; }
             }
-
-            // Validation
-            if (!name) { alert('Please enter your name'); return; }
-            if (!phone || phone.length < 10) { alert('Please enter a valid phone number'); return; }
-            if (!finalSpecialty) { alert('Please select your specialty'); return; }
-            if (!qualification) { alert('Please enter your qualification'); return; }
-            if (!fee || parseInt(fee) < 100) { alert('Please enter a valid fee (min Rs. 100)'); return; }
-
+            
+            if (!name||!phone||!finalSpec||!qual||!fee) { alert('Fill all fields'); return; }
+            
             var btn = document.getElementById('saveBtn');
-            btn.disabled = true;
-            btn.textContent = 'Saving...';
-
-            var updateData = {
-                name: name,
-                phone: '+92' + phone,
-                specialty: finalSpecialty,
-                qualification: qualification,
-                experience: parseInt(experience) || 0,
-                fee: parseInt(fee),
+            btn.disabled = true; btn.textContent = 'Saving...';
+            
+            var data = {
+                name, phone: '+92'+phone, specialty: finalSpec, qualification: qual,
+                experience: parseInt(exp)||0, fee: parseInt(fee),
                 updatedAt: firebase.firestore.FieldValue.serverTimestamp()
             };
-
-            // Handle photo
-            var photoPromise = Promise.resolve();
             
-            if (window._removePhoto) {
-                updateData.photoURL = '';
-            } else if (photoFile) {
-                photoPromise = new Promise(function(resolve, reject) {
-                    var reader = new FileReader();
-                    reader.onload = function(e) {
-                        updateData.photoURL = e.target.result;
-                        resolve();
-                    };
-                    reader.onerror = function() {
-                        reject(new Error('Failed to read photo'));
-                    };
-                    reader.readAsDataURL(photoFile);
+            var p = Promise.resolve();
+            if (window._removePhoto) { data.photoURL = ''; }
+            else if (photo) {
+                p = new Promise(function(res, rej) {
+                    var r = new FileReader();
+                    r.onload = function(e) { data.photoURL = e.target.result; res(); };
+                    r.onerror = rej;
+                    r.readAsDataURL(photo);
                 });
             }
-
-            photoPromise
-                .then(function() {
-                    return db.collection('doctors').doc(user.uid).update(updateData);
-                })
-                .then(function() {
-                    if (newPassword && newPassword.length >= 6) {
-                        return user.updatePassword(newPassword);
-                    }
-                    return Promise.resolve();
-                })
-                .then(function() {
-                    alert('Profile updated successfully!');
-                    document.getElementById('doctorNameDisplay').textContent = 'Dr. ' + name;
-                    window._removePhoto = false;
-                    cancelEdit();
-                })
-                .catch(function(error) {
-                    console.error('Save error:', error);
-                    var msg = 'Failed to save profile.';
-                    if (error.code === 'auth/requires-recent-login') {
-                        msg = 'Please logout and login again to change password.';
-                    }
-                    alert(msg + '\n\n' + error.message);
-                })
-                .finally(function() {
-                    btn.disabled = false;
-                    btn.textContent = '💾 Save Changes';
-                });
+            
+            p.then(function() { return db.collection('doctors').doc(user.uid).update(data); })
+            .then(function() { return pass && pass.length>=6 ? user.updatePassword(pass) : Promise.resolve(); })
+            .then(function() { alert('Updated!'); cancelEdit(); })
+            .catch(function(e) { alert('Error: '+e.message); })
+            .finally(function() { btn.disabled = false; btn.textContent = '💾 Save Changes'; });
         }
 
-        // ==================== LOGOUT ====================
-        
         function logout() {
-            firebase.auth().signOut()
-                .then(function() {
-                    window.location.href = 'doctor-login.html';
-                });
+            firebase.auth().signOut().then(function() { window.location.href = 'doctor-login.html'; });
         }
 
-        // ==================== INITIAL LOAD ====================
-        
-        if (currentDoctorId) {
-            loadSchedule();
-        }
+        if (currentDoctorId) { loadSchedule(); }
     </script>
 </body>
 </html>
