@@ -44,12 +44,12 @@
             </div>
             <div class="hero-stats">
                 <div class="stat">
-                    <span class="stat-number">50+</span>
+                    <span class="stat-number" id="doctorCount">50+</span>
                     <span class="stat-label">Verified Doctors</span>
                 </div>
                 <div class="stat">
                     <span class="stat-number">5000+</span>
-                    <span class="stat-label">Successful Consultations</span>
+                    <span class="stat-label">Consultations</span>
                 </div>
                 <div class="stat">
                     <span class="stat-number">24/7</span>
@@ -88,9 +88,9 @@
                 <p>All your information and consultations remain safe and private</p>
             </div>
             <div class="feature-card">
-                <div class="feature-icon">🏥</div>
-                <h3>Gojra's Doctors</h3>
-                <p>Only verified local doctors from Gojra and surrounding areas</p>
+                <div class="feature-icon">⭐</div>
+                <h3>Doctor Reviews</h3>
+                <p>Read patient reviews and ratings before choosing your doctor</p>
             </div>
             <div class="feature-card">
                 <div class="feature-icon">📱</div>
@@ -109,7 +109,7 @@
                 <div class="step-number">1</div>
                 <div class="step-icon">🔍</div>
                 <h3>Find a Doctor</h3>
-                <p>Search for a specialist doctor according to your illness</p>
+                <p>Search for a specialist doctor according to your illness and check their ratings</p>
             </div>
             <div class="step-arrow">→</div>
             <div class="step">
@@ -128,11 +128,23 @@
         </div>
     </section>
 
+    <!-- Featured Doctors -->
+    <section class="doctors-preview" id="doctors">
+        <h2 class="section-title">Our <span class="highlight">Top Doctors</span></h2>
+        <p class="section-subtitle">Best and experienced doctors from Gojra</p>
+        <div class="doctors-grid" id="doctorsList">
+            <p style="text-align: center; grid-column: 1/-1;">Loading doctors...</p>
+        </div>
+        <div class="text-center" style="margin-top: 30px;">
+            <a href="patient-login.html" class="btn btn-primary">View All Doctors →</a>
+        </div>
+    </section>
+
     <!-- CTA -->
     <section class="cta">
         <div class="cta-content">
             <h2>Create Your Free Account Today!</h2>
-            <p>Consult with the best doctors in Gojra from the comfort of your home</p>
+            <p>Consult with the best doctors in Gojra from the comfort of your home. First consultation 50% off!</p>
             <div class="cta-buttons">
                 <a href="patient-login.html" class="btn btn-white btn-lg">🚀 Join as Patient</a>
                 <a href="doctor-login.html" class="btn btn-outline-white btn-lg">👨‍⚕️ Join as Doctor</a>
@@ -145,19 +157,20 @@
         <div class="footer-content">
             <div class="footer-section">
                 <h3>⚕️ Gojra Doctors</h3>
-                <p>Gojra's first and largest online clinic</p>
+                <p>Gojra's first and largest online clinic. Our mission is to provide quality healthcare to everyone from the comfort of their home.</p>
             </div>
             <div class="footer-section">
                 <h3>Quick Links</h3>
                 <a href="index.html">Home</a>
                 <a href="#features">Features</a>
+                <a href="#doctors">Doctors</a>
                 <a href="patient-login.html">Patient Login</a>
                 <a href="doctor-login.html">Doctor Login</a>
             </div>
             <div class="footer-section">
                 <h3>Contact</h3>
-                <p>📞 0328-0203486</p>
-                <p>📧 gojradoctors@gmail.com</p>
+                <p>📞 0300-XXXXXXX</p>
+                <p>📧 info@gojradoctors.com</p>
                 <p>📍 Gojra, District Toba Tek Singh</p>
             </div>
         </div>
@@ -166,6 +179,16 @@
         </div>
     </footer>
 
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+    
+    <!-- Firebase Config -->
+    <script src="js/firebase-config.js"></script>
+    
+    <!-- App JS -->
+    <script src="js/app.js"></script>
+    
     <script>
         function toggleMenu() {
             document.getElementById('navLinks').classList.toggle('active');
