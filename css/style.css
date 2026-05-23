@@ -1277,6 +1277,53 @@ body {
     color: var(--white);
 }
 
+/* ========== Profile Photo Styling ========== */
+#profilePhotoLarge {
+    transition: all 0.3s ease;
+}
+
+#profilePhotoLarge:hover {
+    transform: scale(1.05);
+}
+
+#editPhotoPreviewImg {
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+#editPhotoPreviewImg:hover {
+    opacity: 0.8;
+}
+
+.edit-form hr {
+    margin: 20px 0;
+    border: none;
+    border-top: 1px solid var(--gray-200);
+}
+
+/* ========== Empty State ========== */
+.empty-state {
+    text-align: center;
+    padding: 50px 20px;
+    background: var(--white);
+    border-radius: 15px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+.empty-state .icon {
+    font-size: 60px;
+    margin-bottom: 15px;
+}
+
+.empty-state h3 {
+    color: var(--gray-700);
+    margin-bottom: 10px;
+}
+
+.empty-state p {
+    color: var(--gray-500);
+}
+
 /* ========== Utility ========== */
 .text-center {
     text-align: center;
