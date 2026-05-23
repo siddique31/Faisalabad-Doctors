@@ -1,190 +1,48 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Patient Login - Gojra Doctors</title>
-    <link rel="stylesheet" href="css/style.css">
-</head>
-<body class="auth-page">
+<!-- Register Form -->
+<div id="registerStep" class="auth-form" style="display: none;">
+    <h3 style="text-align: center; margin-bottom: 20px;">Create Account</h3>
     
-    <div class="auth-container">
-        <div class="auth-card">
-            <div class="auth-header">
-                <a href="index.html" class="back-btn">← Back</a>
-                <div class="auth-logo">⚕️</div>
-                <h2>Patient Login</h2>
-                <p>Login or Create Account</p>
-            </div>
-
-            <!-- Login Form -->
-            <div id="loginStep" class="auth-form">
-                <div class="input-group">
-                    <label>Email</label>
-                    <input type="email" id="loginEmail" placeholder="your@email.com">
-                </div>
-                <div class="input-group">
-                    <label>Password</label>
-                    <input type="password" id="loginPassword" placeholder="Password">
-                </div>
-                <button onclick="loginPatient()" class="btn btn-primary btn-full" id="loginBtn">
-                    Login
-                </button>
-                <p style="text-align: center; margin-top: 15px;">
-                    Don't have an account? 
-                    <a href="#" onclick="showRegister()" style="color: var(--primary);">Register Here</a>
-                </p>
-            </div>
-
-            <!-- Register Form -->
-            <div id="registerStep" class="auth-form" style="display: none;">
-                <h3 style="text-align: center; margin-bottom: 20px;">Create Account</h3>
-                
-                <div class="input-group">
-                    <label>Full Name</label>
-                    <input type="text" id="fullName" placeholder="Enter your name">
-                </div>
-                <div class="input-group">
-                    <label>Email</label>
-                    <input type="email" id="regEmail" placeholder="your@email.com">
-                </div>
-                <div class="input-group">
-                    <label>Password</label>
-                    <input type="password" id="regPassword" placeholder="Min 6 characters" minlength="6">
-                </div>
-                <div class="input-group">
-                    <label>Confirm Password</label>
-                    <input type="password" id="confirmPassword" placeholder="Re-enter password" minlength="6">
-                </div>
-                <div class="input-group">
-                    <label>Age</label>
-                    <input type="number" id="age" placeholder="Age" min="1" max="120">
-                </div>
-                <div class="input-group">
-                    <label>Gender</label>
-                    <select id="gender">
-                        <option value="">Select</option>
-                        <option value="male">Male</option>
-                        <option value="female">Female</option>
-                        <option value="other">Other</option>
-                    </select>
-                </div>
-                <button onclick="registerPatient()" class="btn btn-primary btn-full">
-                    Register
-                </button>
-                <p style="text-align: center; margin-top: 15px;">
-                    Already have an account? 
-                    <a href="#" onclick="showLogin()" style="color: var(--primary);">Login Here</a>
-                </p>
-            </div>
-
-            <div id="messageBox" class="message-box" style="display: none;"></div>
+    <div class="input-group">
+        <label>Full Name *</label>
+        <input type="text" id="fullName" placeholder="Enter your name">
+    </div>
+    <div class="input-group">
+        <label>Email *</label>
+        <input type="email" id="regEmail" placeholder="your@email.com">
+    </div>
+    <div class="input-group">
+        <label>Phone Number *</label>
+        <div class="phone-input">
+            <span class="country-code">+92</span>
+            <input type="tel" id="regPhone" placeholder="3XX-XXXXXXX" maxlength="10">
         </div>
     </div>
-
-    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
-    <script src="js/firebase-config.js"></script>
-    <script>
-        function showMessage(msg, type = 'info') {
-            const box = document.getElementById('messageBox');
-            box.style.display = 'block';
-            box.textContent = msg;
-            box.className = 'message-box ' + type;
-            setTimeout(() => box.style.display = 'none', 5000);
-        }
-
-        function showRegister() {
-            document.getElementById('loginStep').style.display = 'none';
-            document.getElementById('registerStep').style.display = 'block';
-        }
-
-        function showLogin() {
-            document.getElementById('registerStep').style.display = 'none';
-            document.getElementById('loginStep').style.display = 'block';
-        }
-
-        // Patient Login
-        function loginPatient() {
-            const email = document.getElementById('loginEmail').value.trim();
-            const password = document.getElementById('loginPassword').value;
-
-            if (!email || !password) {
-                showMessage('Please enter email and password', 'error');
-                return;
-            }
-
-            const btn = document.getElementById('loginBtn');
-            btn.disabled = true;
-            btn.textContent = 'Logging in...';
-
-            firebase.auth().signInWithEmailAndPassword(email, password)
-                .then((result) => {
-                    showMessage('Login successful!', 'success');
-                    setTimeout(() => window.location.href = 'patient-home.html', 1000);
-                })
-                .catch((error) => {
-                    let msg = 'Login failed!';
-                    if (error.code === 'auth/user-not-found') msg = 'No account found with this email. Please register.';
-                    else if (error.code === 'auth/wrong-password') msg = 'Incorrect password!';
-                    else if (error.code === 'auth/invalid-email') msg = 'Invalid email address!';
-                    showMessage(msg, 'error');
-                })
-                .finally(() => {
-                    btn.disabled = false;
-                    btn.textContent = 'Login';
-                });
-        }
-
-        // Patient Registration
-        function registerPatient() {
-            const name = document.getElementById('fullName').value.trim();
-            const email = document.getElementById('regEmail').value.trim();
-            const password = document.getElementById('regPassword').value;
-            const confirm = document.getElementById('confirmPassword').value;
-            const age = document.getElementById('age').value;
-            const gender = document.getElementById('gender').value;
-
-            if (!name || !email || !password || !confirm || !age || !gender) {
-                showMessage('Please fill in all fields', 'error');
-                return;
-            }
-
-            if (password !== confirm) {
-                showMessage('Passwords do not match!', 'error');
-                return;
-            }
-
-            if (password.length < 6) {
-                showMessage('Password must be at least 6 characters', 'error');
-                return;
-            }
-
-            firebase.auth().createUserWithEmailAndPassword(email, password)
-                .then((result) => {
-                    const user = result.user;
-                    // Save patient data
-                    return db.collection('patients').doc(user.uid).set({
-                        name: name,
-                        email: email,
-                        age: parseInt(age),
-                        gender: gender,
-                        phone: '',
-                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                    });
-                })
-                .then(() => {
-                    showMessage('Registration successful! Redirecting...', 'success');
-                    setTimeout(() => window.location.href = 'patient-home.html', 1500);
-                })
-                .catch((error) => {
-                    let msg = 'Registration failed!';
-                    if (error.code === 'auth/email-already-in-use') msg = 'This email is already registered. Please login.';
-                    else if (error.code === 'auth/weak-password') msg = 'Password is too weak!';
-                    showMessage(msg, 'error');
-                });
-        }
-    </script>
-</body>
-</html>
+    <div class="input-group">
+        <label>Password *</label>
+        <input type="password" id="regPassword" placeholder="Min 6 characters" minlength="6">
+    </div>
+    <div class="input-group">
+        <label>Confirm Password *</label>
+        <input type="password" id="confirmPassword" placeholder="Re-enter password" minlength="6">
+    </div>
+    <div class="input-group">
+        <label>Age</label>
+        <input type="number" id="age" placeholder="Age" min="1" max="120">
+    </div>
+    <div class="input-group">
+        <label>Gender</label>
+        <select id="gender">
+            <option value="">Select</option>
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+            <option value="other">Other</option>
+        </select>
+    </div>
+    <button onclick="registerPatient()" class="btn btn-primary btn-full">
+        Register
+    </button>
+    <p style="text-align: center; margin-top: 15px;">
+        Already have an account? 
+        <a href="#" onclick="showLogin()" style="color: var(--primary);">Login Here</a>
+    </p>
+</div>
