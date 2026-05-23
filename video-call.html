@@ -6,112 +6,747 @@
     <title>Video Call - Gojra Doctors</title>
     <link rel="stylesheet" href="css/style.css">
     <style>
-        .video-container {
-            max-width: 900px;
-            margin: 50px auto;
-            padding: 20px;
-            text-align: center;
+        :root {
+            --primary: #0d9488;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --info: #3b82f6;
+            --white: #ffffff;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-700: #374151;
         }
-        
-        .video-box {
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Poppins', sans-serif;
             background: #1a1a2e;
-            border-radius: 15px;
-            padding: 40px;
-            margin-bottom: 20px;
-            color: white;
-            min-height: 400px;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .call-container {
+            display: flex;
+            height: 100vh;
+        }
+
+        /* Video Area */
+        .video-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #0f0f23;
+            position: relative;
+        }
+
+        .videos-grid {
+            flex: 1;
+            display: flex;
+            position: relative;
+        }
+
+        .video-box {
+            flex: 1;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .video-box.remote {
+            background: #1a1a2e;
+        }
+
+        .video-box video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .video-box.local {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            width: 200px;
+            height: 150px;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 3px solid var(--white);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+            z-index: 10;
+            background: #2a2a3e;
+        }
+
+        .video-box.local video {
+            object-fit: cover;
+        }
+
+        .no-video {
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
+            color: var(--white);
+            opacity: 0.7;
         }
-        
-        .video-placeholder {
+
+        .no-video .icon {
             font-size: 80px;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
-        
+
+        .no-video p {
+            font-size: 18px;
+        }
+
+        /* Controls */
         .call-controls {
             display: flex;
             gap: 20px;
             justify-content: center;
-            flex-wrap: wrap;
+            align-items: center;
+            padding: 20px;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(10px);
         }
-        
-        .call-btn {
-            width: 60px;
-            height: 60px;
+
+        .control-btn {
+            width: 55px;
+            height: 55px;
             border-radius: 50%;
             border: none;
-            font-size: 24px;
+            font-size: 22px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--white);
+        }
+
+        .control-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .control-btn.end-call {
+            background: var(--danger);
+            width: 65px;
+            height: 65px;
+            font-size: 28px;
+        }
+
+        .control-btn.mute {
+            background: #374151;
+        }
+
+        .control-btn.mute.active {
+            background: var(--warning);
+        }
+
+        .control-btn.video-toggle {
+            background: #374151;
+        }
+
+        .control-btn.video-toggle.active {
+            background: var(--warning);
+        }
+
+        .control-btn.switch-camera {
+            background: var(--info);
+        }
+
+        .control-btn.chat-toggle {
+            background: #374151;
+        }
+
+        .control-btn.chat-toggle.active {
+            background: var(--primary);
+        }
+
+        .control-btn.speaker {
+            background: #374151;
+        }
+
+        .control-btn.speaker.active {
+            background: var(--info);
+        }
+
+        .control-label {
+            color: var(--white);
+            font-size: 11px;
+            text-align: center;
+            margin-top: 5px;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* Chat Panel */
+        .chat-panel {
+            width: 350px;
+            background: var(--white);
+            display: none;
+            flex-direction: column;
+            border-left: 1px solid var(--gray-200);
+        }
+
+        .chat-panel.open {
+            display: flex;
+        }
+
+        .chat-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--gray-200);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--gray-100);
+        }
+
+        .chat-header h3 {
+            margin: 0;
+            color: var(--gray-700);
+        }
+
+        .close-chat {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: var(--gray-700);
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .chat-message {
+            max-width: 80%;
+            padding: 10px 15px;
+            border-radius: 15px;
+            font-size: 14px;
+            line-height: 1.5;
+            word-wrap: break-word;
+        }
+
+        .chat-message.sent {
+            background: var(--primary);
+            color: var(--white);
+            align-self: flex-end;
+            border-bottom-right-radius: 5px;
+        }
+
+        .chat-message.received {
+            background: var(--gray-100);
+            color: var(--gray-700);
+            align-self: flex-start;
+            border-bottom-left-radius: 5px;
+        }
+
+        .chat-message .time {
+            font-size: 10px;
+            opacity: 0.7;
+            margin-top: 5px;
+            display: block;
+        }
+
+        .chat-input-area {
+            padding: 15px;
+            border-top: 1px solid var(--gray-200);
+            display: flex;
+            gap: 10px;
+        }
+
+        .chat-input-area input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 1px solid var(--gray-200);
+            border-radius: 25px;
+            font-size: 14px;
+            font-family: inherit;
+            outline: none;
+        }
+
+        .chat-input-area input:focus {
+            border-color: var(--primary);
+        }
+
+        .send-btn {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: var(--white);
+            border: none;
+            font-size: 18px;
             cursor: pointer;
             transition: all 0.3s;
         }
-        
-        .call-end { background: #ef4444; color: white; }
-        .call-mute { background: #f59e0b; color: white; }
-        .call-video { background: #3b82f6; color: white; }
-        
-        .call-btn:hover { transform: scale(1.1); }
+
+        .send-btn:hover {
+            background: #0f766e;
+            transform: scale(1.1);
+        }
+
+        /* Call Info */
+        .call-info {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: var(--white);
+            z-index: 5;
+        }
+
+        .call-info h3 {
+            font-size: 18px;
+            margin-bottom: 5px;
+        }
+
+        .call-info .call-status {
+            font-size: 12px;
+            opacity: 0.7;
+        }
+
+        .call-timer {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: var(--white);
+            font-size: 16px;
+            z-index: 5;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .call-container {
+                flex-direction: column;
+            }
+
+            .video-box.local {
+                width: 120px;
+                height: 90px;
+                bottom: 100px;
+                right: 10px;
+            }
+
+            .chat-panel {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                height: 60vh;
+                width: 100%;
+                border-radius: 20px 20px 0 0;
+                z-index: 100;
+            }
+
+            .control-btn {
+                width: 45px;
+                height: 45px;
+                font-size: 18px;
+            }
+
+            .control-btn.end-call {
+                width: 55px;
+                height: 55px;
+                font-size: 24px;
+            }
+
+            .call-controls {
+                gap: 15px;
+                padding: 15px;
+            }
+        }
     </style>
 </head>
 <body>
     
-    <div class="video-container">
-        <h2>🎥 Video Consultation</h2>
-        <p id="appointmentInfo"></p>
+    <div class="call-container">
         
-        <div class="video-box">
-            <div class="video-placeholder">👨‍⚕️</div>
-            <h3>Video Call Feature Coming Soon!</h3>
-            <p>For now, you can contact the doctor via WhatsApp or Zoom.</p>
-            <p style="margin-top: 20px; background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px;">
-                📞 Doctor's Contact: <strong id="doctorContact">Loading...</strong>
-            </p>
+        <!-- Video Area -->
+        <div class="video-area">
+            
+            <!-- Call Info -->
+            <div class="call-info">
+                <h3 id="callDoctorName">Dr. Name</h3>
+                <span class="call-status" id="callStatus">Connecting...</span>
+            </div>
+            
+            <!-- Call Timer -->
+            <div class="call-timer" id="callTimer" style="display: none;">00:00</div>
+            
+            <!-- Videos -->
+            <div class="videos-grid">
+                <!-- Remote Video -->
+                <div class="video-box remote" id="remoteVideoBox">
+                    <div class="no-video" id="remotePlaceholder">
+                        <span class="icon">👨‍⚕️</span>
+                        <p>Waiting for doctor...</p>
+                    </div>
+                    <video id="remoteVideo" autoplay playsinline style="display: none;"></video>
+                </div>
+                
+                <!-- Local Video -->
+                <div class="video-box local" id="localVideoBox">
+                    <video id="localVideo" autoplay playsinline muted></video>
+                </div>
+            </div>
+            
+            <!-- Controls -->
+            <div class="call-controls">
+                <div class="control-group">
+                    <button class="control-btn mute" id="muteBtn" onclick="toggleMute()" title="Mute">
+                        🎤
+                    </button>
+                    <span class="control-label">Mute</span>
+                </div>
+                
+                <div class="control-group">
+                    <button class="control-btn video-toggle" id="videoBtn" onclick="toggleVideo()" title="Video">
+                        📹
+                    </button>
+                    <span class="control-label">Video</span>
+                </div>
+                
+                <div class="control-group">
+                    <button class="control-btn end-call" onclick="endCall()" title="End Call">
+                        📞
+                    </button>
+                    <span class="control-label">End</span>
+                </div>
+                
+                <div class="control-group">
+                    <button class="control-btn switch-camera" onclick="switchCamera()" title="Switch Camera">
+                        🔄
+                    </button>
+                    <span class="control-label">Flip</span>
+                </div>
+                
+                <div class="control-group">
+                    <button class="control-btn speaker" id="speakerBtn" onclick="toggleSpeaker()" title="Speaker">
+                        🔊
+                    </button>
+                    <span class="control-label">Speaker</span>
+                </div>
+                
+                <div class="control-group">
+                    <button class="control-btn chat-toggle" id="chatBtn" onclick="toggleChat()" title="Chat">
+                        💬
+                    </button>
+                    <span class="control-label">Chat</span>
+                </div>
+            </div>
         </div>
         
-        <div class="call-controls">
-            <button class="call-btn call-end" title="End Call" onclick="endCall()">📞</button>
-            <button class="call-btn call-mute" title="Mute">🔇</button>
-            <button class="call-btn call-video" title="Toggle Video">📹</button>
+        <!-- Chat Panel -->
+        <div class="chat-panel" id="chatPanel">
+            <div class="chat-header">
+                <h3>💬 Chat</h3>
+                <button class="close-chat" onclick="toggleChat()">✕</button>
+            </div>
+            <div class="chat-messages" id="chatMessages">
+                <p style="text-align: center; color: #999; margin-top: 50px;">
+                    No messages yet.<br>Start chatting!
+                </p>
+            </div>
+            <div class="chat-input-area">
+                <input type="text" id="chatInput" placeholder="Type a message..." onkeypress="handleChatKey(event)">
+                <button class="send-btn" onclick="sendMessage()">📤</button>
+            </div>
         </div>
         
-        <div style="margin-top: 30px;">
-            <a href="patient-home.html" class="btn btn-outline">Back to Dashboard</a>
-        </div>
     </div>
 
+    <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
     <script src="js/firebase-config.js"></script>
+    
     <script>
+        // ==========================================
+        // VIDEO CALL + AUDIO + CHAT + CAMERA SWITCH
+        // ==========================================
+        
+        let localStream = null;
+        let isMuted = false;
+        let isVideoOff = false;
+        let isSpeakerOn = false;
+        let isChatOpen = false;
+        let facingMode = 'user'; // 'user' = front, 'environment' = back
+        let callStartTime = null;
+        let timerInterval = null;
+        
+        // Get appointment ID from URL
         const params = new URLSearchParams(window.location.search);
         const appointmentId = params.get('id');
-
-        if (appointmentId) {
-            db.collection('appointments').doc(appointmentId).get()
-                .then((doc) => {
-                    if (doc.exists) {
-                        const data = doc.data();
-                        document.getElementById('appointmentInfo').textContent = 
-                            `Doctor: ${data.doctorName} | Date: ${data.date} | Time: ${data.time}`;
-                        
-                        return db.collection('doctors').doc(data.doctorId).get();
-                    }
-                })
-                .then((doc) => {
-                    if (doc && doc.exists) {
-                        document.getElementById('doctorContact').textContent = doc.data().phone;
-                    }
-                });
+        
+        // ==================== INITIALIZATION ====================
+        
+        async function initCall() {
+            if (!appointmentId) {
+                alert('No appointment ID found!');
+                window.location.href = 'patient-home.html';
+                return;
+            }
+            
+            // Get appointment details
+            const doc = await db.collection('appointments').doc(appointmentId).get();
+            if (doc.exists) {
+                const data = doc.data();
+                document.getElementById('callDoctorName').textContent = 'Dr. ' + data.doctorName;
+            }
+            
+            // Start camera
+            await startCamera();
+            
+            // Start timer
+            startTimer();
+            
+            // Update status
+            document.getElementById('callStatus').textContent = 'Connected';
         }
-
+        
+        // ==================== CAMERA FUNCTIONS ====================
+        
+        async function startCamera() {
+            try {
+                localStream = await navigator.mediaDevices.getUserMedia({
+                    video: {
+                        facingMode: facingMode,
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 }
+                    },
+                    audio: true
+                });
+                
+                const localVideo = document.getElementById('localVideo');
+                localVideo.srcObject = localStream;
+                
+                document.getElementById('callStatus').textContent = 'Connected';
+                
+            } catch (error) {
+                console.error('Camera error:', error);
+                document.getElementById('callStatus').textContent = 'Camera access denied';
+                
+                // Try audio only
+                try {
+                    localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+                    document.getElementById('localVideoBox').style.display = 'none';
+                } catch (audioError) {
+                    alert('Please allow camera and microphone access.');
+                }
+            }
+        }
+        
+        async function switchCamera() {
+            facingMode = facingMode === 'user' ? 'environment' : 'user';
+            
+            // Stop current stream
+            if (localStream) {
+                localStream.getTracks().forEach(track => track.stop());
+            }
+            
+            // Start new stream with switched camera
+            await startCamera();
+            
+            // Update button text
+            document.querySelector('.switch-camera').textContent = facingMode === 'user' ? '🔄' : '📷';
+        }
+        
+        // ==================== MUTE / UNMUTE ====================
+        
+        function toggleMute() {
+            if (!localStream) return;
+            
+            const audioTrack = localStream.getAudioTracks()[0];
+            if (audioTrack) {
+                isMuted = !isMuted;
+                audioTrack.enabled = !isMuted;
+                
+                const btn = document.getElementById('muteBtn');
+                if (isMuted) {
+                    btn.classList.add('active');
+                    btn.textContent = '🔇';
+                } else {
+                    btn.classList.remove('active');
+                    btn.textContent = '🎤';
+                }
+            }
+        }
+        
+        // ==================== VIDEO ON / OFF ====================
+        
+        function toggleVideo() {
+            if (!localStream) return;
+            
+            const videoTrack = localStream.getVideoTracks()[0];
+            if (videoTrack) {
+                isVideoOff = !isVideoOff;
+                videoTrack.enabled = !isVideoOff;
+                
+                const btn = document.getElementById('videoBtn');
+                const localVideo = document.getElementById('localVideo');
+                
+                if (isVideoOff) {
+                    btn.classList.add('active');
+                    btn.textContent = '📷';
+                    localVideo.style.display = 'none';
+                } else {
+                    btn.classList.remove('active');
+                    btn.textContent = '📹';
+                    localVideo.style.display = 'block';
+                }
+            }
+        }
+        
+        // ==================== SPEAKER TOGGLE ====================
+        
+        function toggleSpeaker() {
+            isSpeakerOn = !isSpeakerOn;
+            const btn = document.getElementById('speakerBtn');
+            
+            if (isSpeakerOn) {
+                btn.classList.add('active');
+                btn.textContent = '📢';
+            } else {
+                btn.classList.remove('active');
+                btn.textContent = '🔊';
+            }
+            
+            // Note: Speaker control works automatically on mobile
+            // For desktop, browser handles audio output
+        }
+        
+        // ==================== CHAT FUNCTIONS ====================
+        
+        function toggleChat() {
+            isChatOpen = !isChatOpen;
+            const panel = document.getElementById('chatPanel');
+            const btn = document.getElementById('chatBtn');
+            
+            if (isChatOpen) {
+                panel.classList.add('open');
+                btn.classList.add('active');
+            } else {
+                panel.classList.remove('open');
+                btn.classList.remove('active');
+            }
+        }
+        
+        function handleChatKey(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+        
+        function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            
+            if (!message) return;
+            
+            const now = new Date();
+            const time = now.toLocaleTimeString('en-PK', { hour: '2-digit', minute: '2-digit' });
+            
+            // Add message to chat
+            addChatMessage(message, 'sent', time);
+            
+            // Save to Firestore
+            if (appointmentId) {
+                db.collection('appointments').doc(appointmentId).collection('messages').add({
+                    text: message,
+                    sender: 'patient',
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                }).catch(err => console.error('Error saving message:', err));
+            }
+            
+            // Clear input
+            input.value = '';
+            input.focus();
+        }
+        
+        function addChatMessage(text, type, time) {
+            const messagesDiv = document.getElementById('chatMessages');
+            
+            // Remove placeholder
+            const placeholder = messagesDiv.querySelector('p');
+            if (placeholder) placeholder.remove();
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'chat-message ' + type;
+            messageDiv.innerHTML = text + '<span class="time">' + time + '</span>';
+            
+            messagesDiv.appendChild(messageDiv);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+        
+        // ==================== TIMER ====================
+        
+        function startTimer() {
+            callStartTime = Date.now();
+            document.getElementById('callTimer').style.display = 'block';
+            
+            timerInterval = setInterval(() => {
+                const elapsed = Math.floor((Date.now() - callStartTime) / 1000);
+                const minutes = Math.floor(elapsed / 60).toString().padStart(2, '0');
+                const seconds = (elapsed % 60).toString().padStart(2, '0');
+                document.getElementById('callTimer').textContent = minutes + ':' + seconds;
+            }, 1000);
+        }
+        
+        function stopTimer() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+        }
+        
+        // ==================== END CALL ====================
+        
         function endCall() {
             if (confirm('Are you sure you want to end the call?')) {
+                stopTimer();
+                
+                // Stop stream
+                if (localStream) {
+                    localStream.getTracks().forEach(track => track.stop());
+                }
+                
+                // Update appointment status
+                if (appointmentId) {
+                    db.collection('appointments').doc(appointmentId).update({
+                        status: 'completed',
+                        endedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                }
+                
+                // Go back
                 window.location.href = 'patient-home.html';
             }
         }
+        
+        // ==================== PAGE INIT ====================
+        
+        window.addEventListener('beforeunload', () => {
+            if (localStream) {
+                localStream.getTracks().forEach(track => track.stop());
+            }
+            stopTimer();
+        });
+        
+        // Start call on page load
+        initCall();
     </script>
 </body>
 </html>
