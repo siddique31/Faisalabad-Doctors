@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Call - Gojra Doctors</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .video-container {
+            max-width: 900px;
+            margin: 50px auto;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .video-box {
+            background: #1a1a2e;
+            border-radius: 15px;
+            padding: 40px;
+            margin-bottom: 20px;
+            color: white;
+            min-height: 400px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .video-placeholder {
+            font-size: 80px;
+            margin-bottom: 20px;
+        }
+        
+        .call-controls {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .call-btn {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .call-end { background: #ef4444; color: white; }
+        .call-mute { background: #f59e0b; color: white; }
+        .call-video { background: #3b82f6; color: white; }
+        
+        .call-btn:hover { transform: scale(1.1); }
+    </style>
+</head>
+<body>
+    
+    <div class="video-container">
+        <h2>🎥 Video Consultation</h2>
+        <p id="appointmentInfo"></p>
+        
+        <div class="video-box">
+            <div class="video-placeholder">👨‍⚕️</div>
+            <h3>Video Call Feature Coming Soon!</h3>
+            <p>For now, you can contact the doctor via WhatsApp or Zoom.</p>
+            <p style="margin-top: 20px; background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px;">
+                📞 Doctor's Contact: <strong id="doctorContact">Loading...</strong>
+            </p>
+        </div>
+        
+        <div class="call-controls">
+            <button class="call-btn call-end" title="End Call" onclick="endCall()">📞</button>
+            <button class="call-btn call-mute" title="Mute">🔇</button>
+            <button class="call-btn call-video" title="Toggle Video">📹</button>
+        </div>
+        
+        <div style="margin-top: 30px;">
+            <a href="patient-home.html" class="btn btn-outline">Back to Dashboard</a>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+    <script src="js/firebase-config.js"></script>
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const appointmentId = params.get('id');
+
+        if (appointmentId) {
+            db.collection('appointments').doc(appointmentId).get()
+                .then((doc) => {
+                    if (doc.exists) {
+                        const data = doc.data();
+                        document.getElementById('appointmentInfo').textContent = 
+                            `Doctor: ${data.doctorName} | Date: ${data.date} | Time: ${data.time}`;
+                        
+                        return db.collection('doctors').doc(data.doctorId).get();
+                    }
+                })
+                .then((doc) => {
+                    if (doc && doc.exists) {
+                        document.getElementById('doctorContact').textContent = doc.data().phone;
+                    }
+                });
+        }
+
+        function endCall() {
+            if (confirm('Are you sure you want to end the call?')) {
+                window.location.href = 'patient-home.html';
+            }
+        }
+    </script>
+</body>
+</html>
