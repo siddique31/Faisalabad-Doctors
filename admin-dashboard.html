@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Gojra Doctors</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    
+    <header class="header">
+        <nav class="navbar">
+            <div class="logo">
+                <span class="logo-icon">🛡️</span>
+                <span class="logo-text">Admin Panel</span>
+            </div>
+            <div class="nav-links">
+                <button onclick="logout()" class="btn btn-outline">Logout</button>
+            </div>
+        </nav>
+    </header>
+
+    <main class="dashboard">
+        <div class="dashboard-sidebar">
+            <div class="sidebar-menu">
+                <a href="#" class="sidebar-link active" onclick="showSection('doctors')">👨‍⚕️ Doctors</a>
+                <a href="#" class="sidebar-link" onclick="showSection('patients')">👥 Patients</a>
+                <a href="#" class="sidebar-link" onclick="showSection('appointments')">📅 Appointments</a>
+                <a href="#" class="sidebar-link" onclick="showSection('earnings')">💰 Commission</a>
+            </div>
+        </div>
+
+        <div class="dashboard-content">
+            
+            <!-- Doctors Management -->
+            <div id="doctorsSection" class="dashboard-section">
+                <h2>Doctors List</h2>
+                
+                <div class="tabs">
+                    <button class="tab active" onclick="filterDoctorsByStatus('pending')">⏳ Pending Approval</button>
+                    <button class="tab" onclick="filterDoctorsByStatus('approved')">✅ Approved</button>
+                    <button class="tab" onclick="filterDoctorsByStatus('all')">📋 All</button>
+                </div>
+                
+                <div id="doctorsList">
+                    <p>Loading doctors...</p>
+                </div>
+            </div>
+
+            <!-- Patients -->
+            <div id="patientsSection" class="dashboard-section" style="display: none;">
+                <h2>Patients List</h2>
+                <div id="patientsList">
+                    <p>Loading patients...</p>
+                </div>
+            </div>
+
+            <!-- Appointments -->
+            <div id="appointmentsSection" class="dashboard-section" style="display: none;">
+                <h2>All Appointments</h2>
+                <div id="allAppointmentsList">
+                    <p>Loading appointments...</p>
+                </div>
+            </div>
+
+            <!-- Commission -->
+            <div id="earningsSection" class="dashboard-section" style="display: none;">
+                <h2>Commission Details</h2>
+                <div id="commissionInfo">
+                    <p>Loading...</p>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+    <script src="js/firebase-config.js"></script>
+    <script>
+        firebase.auth().onAuthStateChanged((user) => {
+            if (!user) {
+                window.location.href = 'admin-login.html';
+                return;
+            }
+            loadPendingDoctors();
+        });
+
+        let currentFilter = 'pending';
+
+        function filterDoctorsByStatus(status) {
+            currentFilter = status;
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            if (status === 'pending') loadPendingDoctors();
+            else if (status === 'approved') loadApprovedDoctors();
+            else loadAllDoctors();
+        }
+
+        function loadPendingDoctors() {
+            db.collection('doctors')
+                .where('isApproved', '==', false)
+                .get()
+                .then((snapshot) => {
+                    displayDoctors(snapshot, 'pending');
+                });
+        }
+
+        function loadApprovedDoctors() {
+            db.collection('doctors')
+                .where('isApproved', '==', true)
+                .get()
+                .then((snapshot) => {
+                    displayDoctors(snapshot, 'approved');
+                });
+        }
+
+        function loadAllDoctors() {
+            db.collection('doctors').get()
+                .then((snapshot) => {
+                    displayDoctors(snapshot, 'all');
+                });
+        }
+
+        function displayDoctors(snapshot, type) {
+            const list = document.getElementById('doctorsList');
+            
+            if (snapshot.empty) {
+                list.innerHTML = '<p>No doctors found</p>';
+                return;
+            }
+
+            list.innerHTML = snapshot.docs.map(doc => {
+                const data = doc.data();
+                return `
+                    <div class="doctor-card">
+                        <h4>${data.name}</h4>
+                        <p>Specialty: ${data.specialty}</p>
+                        <p>PMDC: ${data.pmdcNumber}</p>
+                        <p>Phone: ${data.phone}</p>
+                        <p>Fee: Rs. ${data.fee}</p>
+                        <p>Status: ${data.isApproved ? '✅ Approved' : '⏳ Pending'}</p>
+                        ${!data.isApproved ? 
+                            `<button onclick="approveDoctor('${doc.id}')" class="btn btn-success">Approve</button>` : 
+                            `<button onclick="rejectDoctor('${doc.id}')" class="btn btn-danger">Suspend</button>`
+                        }
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function approveDoctor(doctorId) {
+            db.collection('doctors').doc(doctorId).update({
+                isApproved: true
+            })
+            .then(() => {
+                alert('Doctor approved successfully!');
+                loadPendingDoctors();
+            })
+            .catch((error) => {
+                alert('Error: ' + error.message);
+            });
+        }
+
+        function rejectDoctor(doctorId) {
+            if (confirm('Are you sure you want to suspend this doctor?')) {
+                db.collection('doctors').doc(doctorId).update({
+                    isApproved: false
+                })
+                .then(() => {
+                    alert('Doctor suspended');
+                    loadApprovedDoctors();
+                });
+            }
+        }
+
+        function showSection(section) {
+            document.querySelectorAll('.dashboard-section').forEach(s => s.style.display = 'none');
+            document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+            document.getElementById(section + 'Section').style.display = 'block';
+            event.target.classList.add('active');
+
+            if (section === 'patients') loadPatients();
+            if (section === 'appointments') loadAllAppointments();
+            if (section === 'earnings') loadCommissionInfo();
+        }
+
+        function loadPatients() {
+            db.collection('patients').get()
+                .then((snapshot) => {
+                    const list = document.getElementById('patientsList');
+                    if (snapshot.empty) {
+                        list.innerHTML = '<p>No patients found</p>';
+                        return;
+                    }
+                    list.innerHTML = snapshot.docs.map(doc => {
+                        const data = doc.data();
+                        return `
+                            <div class="patient-card">
+                                <p><strong>Name:</strong> ${data.name}</p>
+                                <p><strong>Phone:</strong> ${data.phone}</p>
+                                <p><strong>Age:</strong> ${data.age}</p>
+                            </div>
+                        `;
+                    }).join('');
+                });
+        }
+
+        function loadAllAppointments() {
+            db.collection('appointments').orderBy('createdAt', 'desc').get()
+                .then((snapshot) => {
+                    const list = document.getElementById('allAppointmentsList');
+                    if (snapshot.empty) {
+                        list.innerHTML = '<p>No appointments found</p>';
+                        return;
+                    }
+                    list.innerHTML = snapshot.docs.map(doc => {
+                        const data = doc.data();
+                        return `
+                            <div class="appointment-card">
+                                <p><strong>Doctor:</strong> ${data.doctorName}</p>
+                                <p><strong>Date:</strong> ${data.date} - ${data.time}</p>
+                                <p><strong>Fee:</strong> Rs. ${data.fee}</p>
+                                <p><strong>Commission (10%):</strong> Rs. ${Math.round(data.fee * 0.1)}</p>
+                                <p><strong>Status:</strong> ${data.status}</p>
+                            </div>
+                        `;
+                    }).join('');
+                });
+        }
+
+        function loadCommissionInfo() {
+            document.getElementById('commissionInfo').innerHTML = `
+                <div class="earnings-card">
+                    <h3>Commission Rate: 10%</h3>
+                    <p>10% commission is automatically collected on all appointments</p>
+                </div>
+            `;
+        }
+
+        function logout() {
+            firebase.auth().signOut().then(() => {
+                window.location.href = 'admin-login.html';
+            });
+        }
+    </script>
+</body>
+</html>
