@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Appointment - Gojra Doctors</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="auth-page">
+    
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="auth-header">
+                <h2>📅 Book Appointment</h2>
+                <p id="bookingDoctorName"></p>
+            </div>
+
+            <div class="auth-form">
+                <div class="input-group">
+                    <label>Date</label>
+                    <input type="date" id="bookingDate" min="">
+                </div>
+                
+                <div class="input-group">
+                    <label>Time</label>
+                    <select id="bookingTime">
+                        <option value="">Select Time</option>
+                        <option value="09:00 AM">09:00 AM</option>
+                        <option value="09:30 AM">09:30 AM</option>
+                        <option value="10:00 AM">10:00 AM</option>
+                        <option value="10:30 AM">10:30 AM</option>
+                        <option value="11:00 AM">11:00 AM</option>
+                        <option value="11:30 AM">11:30 AM</option>
+                        <option value="12:00 PM">12:00 PM</option>
+                        <option value="02:00 PM">02:00 PM</option>
+                        <option value="02:30 PM">02:30 PM</option>
+                        <option value="03:00 PM">03:00 PM</option>
+                        <option value="03:30 PM">03:30 PM</option>
+                        <option value="04:00 PM">04:00 PM</option>
+                        <option value="05:00 PM">05:00 PM</option>
+                    </select>
+                </div>
+                
+                <div class="input-group">
+                    <label>Payment Method</label>
+                    <select id="paymentMethod">
+                        <option value="jazzcash">JazzCash</option>
+                        <option value="easypaisa">Easypaisa</option>
+                    </select>
+                </div>
+                
+                <div class="fee-display">
+                    <p>Doctor Fee: <strong id="doctorFee">Rs. 0</strong></p>
+                    <p>Commission (10%): <strong id="commissionFee">Rs. 0</strong></p>
+                    <hr>
+                    <p>Total Payment: <strong id="totalFee">Rs. 0</strong></p>
+                </div>
+
+                <button onclick="confirmBooking()" class="btn btn-primary btn-full">
+                    Pay & Book Now
+                </button>
+            </div>
+
+            <div id="messageBox" class="message-box" style="display: none;"></div>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+    <script src="js/firebase-config.js"></script>
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const doctorId = params.get('doctorId');
+        const doctorName = params.get('name');
+        const fee = parseInt(params.get('fee'));
+
+        document.getElementById('bookingDoctorName').textContent = 'Doctor: ' + (doctorName || '');
+        document.getElementById('doctorFee').textContent = 'Rs. ' + fee;
+        document.getElementById('commissionFee').textContent = 'Rs. ' + Math.round(fee * 0.1);
+        document.getElementById('totalFee').textContent = 'Rs. ' + (fee + Math.round(fee * 0.1));
+
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('bookingDate').setAttribute('min', today);
+
+        function showMessage(msg, type = 'info') {
+            const box = document.getElementById('messageBox');
+            box.style.display = 'block';
+            box.textContent = msg;
+            box.className = 'message-box ' + type;
+        }
+
+        function confirmBooking() {
+            const date = document.getElementById('bookingDate').
