@@ -63,9 +63,10 @@
                     <input type="password" id="regPassword" placeholder="Min 6 characters" minlength="6">
                 </div>
                 
+                <!-- Specialty with Other Option -->
                 <div class="input-group">
                     <label>Specialty *</label>
-                    <select id="specialty">
+                    <select id="specialty" onchange="checkOtherSpecialty()">
                         <option value="">Select Specialty</option>
                         <option value="Cardiology">Cardiology</option>
                         <option value="Dermatology">Dermatology</option>
@@ -79,7 +80,16 @@
                         <option value="ENT">ENT Specialist</option>
                         <option value="Psychiatry">Psychiatry</option>
                         <option value="Urology">Urology</option>
+                        <option value="Radiology">Radiology</option>
+                        <option value="Anesthesiology">Anesthesiology</option>
+                        <option value="Pathology">Pathology</option>
+                        <option value="other">📝 Other (Write Below)</option>
                     </select>
+                </div>
+                
+                <div class="input-group" id="otherSpecialtyGroup" style="display: none;">
+                    <label>Please Specify Your Specialty *</label>
+                    <input type="text" id="otherSpecialty" placeholder="Write your specialty here...">
                 </div>
                 
                 <div class="input-group">
@@ -174,7 +184,21 @@
             document.getElementById('messageBox').style.display = 'none';
         }
 
-        // ==================== DEGREE PREVIEW ====================
+        // ==================== OTHER SPECIALTY CHECK ====================
+        
+        function checkOtherSpecialty() {
+            var specialty = document.getElementById('specialty').value;
+            var otherGroup = document.getElementById('otherSpecialtyGroup');
+            
+            if (specialty === 'other') {
+                otherGroup.style.display = 'block';
+            } else {
+                otherGroup.style.display = 'none';
+                document.getElementById('otherSpecialty').value = '';
+            }
+        }
+
+        // ==================== DEGREE & PHOTO PREVIEW ====================
         
         function previewDegree() {
             var file = document.getElementById('degreeFile').files[0];
@@ -185,7 +209,6 @@
                 return;
             }
 
-            // Check file size (max 500KB)
             if (file.size > 500 * 1024) {
                 preview.innerHTML = '<p style="color: red;">⚠️ File too large! Please upload file under 500KB.</p>';
                 document.getElementById('degreeFile').value = '';
@@ -214,7 +237,6 @@
                 return;
             }
 
-            // Check file size (max 200KB)
             if (file.size > 200 * 1024) {
                 preview.innerHTML = '<p style="color: red;">⚠️ File too large! Please upload photo under 200KB.</p>';
                 document.getElementById('photoFile').value = '';
@@ -289,7 +311,7 @@
             var email = document.getElementById('regEmail').value.trim();
             var phone = document.getElementById('regPhone').value.trim();
             var password = document.getElementById('regPassword').value;
-            var specialty = document.getElementById('specialty').value;
+            var specialtySelect = document.getElementById('specialty').value;
             var qualification = document.getElementById('qualification').value.trim();
             var pmdcNumber = document.getElementById('pmdcNumber').value.trim();
             var experience = document.getElementById('experience').value;
@@ -298,8 +320,18 @@
             var degreeFile = document.getElementById('degreeFile').files[0];
             var photoFile = document.getElementById('photoFile').files[0];
 
+            // Handle "Other" specialty
+            var finalSpecialty = specialtySelect;
+            if (specialtySelect === 'other') {
+                finalSpecialty = document.getElementById('otherSpecialty').value.trim();
+                if (!finalSpecialty) {
+                    showMessage('Please write your specialty', 'error');
+                    return;
+                }
+            }
+
             // Validation
-            if (!name || !email || !phone || !password || !specialty || !qualification || !pmdcNumber || !cnic || !fee) {
+            if (!name || !email || !phone || !password || !finalSpecialty || !qualification || !pmdcNumber || !cnic || !fee) {
                 showMessage('Please fill in all required fields', 'error');
                 return;
             }
@@ -366,7 +398,7 @@
                                 name: name,
                                 email: email,
                                 phone: '+92' + phone,
-                                specialty: specialty,
+                                specialty: finalSpecialty,
                                 qualification: qualification,
                                 pmdcNumber: pmdcNumber,
                                 experience: parseInt(experience) || 0,
