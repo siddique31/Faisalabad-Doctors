@@ -91,4 +91,47 @@
         }
 
         function confirmBooking() {
-            const date = document.getElementById('bookingDate').
+            const date = document.getElementById('bookingDate').value;
+            const time = document.getElementById('bookingTime').value;
+            const paymentMethod = document.getElementById('paymentMethod').value;
+            const user = firebase.auth().currentUser;
+
+            if (!user) {
+                window.location.href = 'patient-login.html';
+                return;
+            }
+
+            if (!date || !time) {
+                showMessage('Please select date and time', 'error');
+                return;
+            }
+
+            const totalFee = fee + Math.round(fee * 0.1);
+
+            if (confirm(`Please pay Rs. ${totalFee} via ${paymentMethod}.\n\nClick OK after payment is complete.`)) {
+                
+                db.collection('appointments').add({
+                    patientId: user.uid,
+                    doctorId: doctorId,
+                    doctorName: doctorName,
+                    fee: fee,
+                    commission: Math.round(fee * 0.1),
+                    totalPaid: totalFee,
+                    date: date,
+                    time: time,
+                    paymentMethod: paymentMethod,
+                    status: 'confirmed',
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                })
+                .then(() => {
+                    showMessage('🎉 Appointment booked successfully!', 'success');
+                    setTimeout(() => window.location.href = 'patient-home.html', 2000);
+                })
+                .catch((error) => {
+                    showMessage('Error: ' + error.message, 'error');
+                });
+            }
+        }
+    </script>
+</body>
+</html>
