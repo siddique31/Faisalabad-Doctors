@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ur" dir="rtl">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مریض ڈیش بورڈ - گوجرہ ڈاکٹرز</title>
+    <title>Patient Dashboard - Gojra Doctors</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -12,11 +12,11 @@
         <nav class="navbar">
             <div class="logo">
                 <span class="logo-icon">⚕️</span>
-                <span class="logo-text">گوجرہ ڈاکٹرز</span>
+                <span class="logo-text">Gojra Doctors</span>
             </div>
             <div class="nav-links">
-                <span id="userNameDisplay">خوش آمدید!</span>
-                <button onclick="logout()" class="btn btn-outline">لاگ آؤٹ</button>
+                <span id="userNameDisplay">Welcome!</span>
+                <button onclick="logout()" class="btn btn-outline">Logout</button>
             </div>
         </nav>
     </header>
@@ -24,59 +24,59 @@
     <main class="dashboard">
         <div class="dashboard-sidebar">
             <div class="sidebar-menu">
-                <a href="#" class="sidebar-link active" onclick="showSection('doctors')">🔍 ڈاکٹرز تلاش کریں</a>
-                <a href="#" class="sidebar-link" onclick="showSection('appointments')">📅 میری اپوائنٹمنٹس</a>
-                <a href="#" class="sidebar-link" onclick="showSection('history')">📋 میری ہسٹری</a>
-                <a href="#" class="sidebar-link" onclick="showSection('profile')">👤 میرا پروفائل</a>
+                <a href="#" class="sidebar-link active" onclick="showSection('doctors')">🔍 Find Doctors</a>
+                <a href="#" class="sidebar-link" onclick="showSection('appointments')">📅 My Appointments</a>
+                <a href="#" class="sidebar-link" onclick="showSection('history')">📋 My History</a>
+                <a href="#" class="sidebar-link" onclick="showSection('profile')">👤 My Profile</a>
             </div>
         </div>
 
         <div class="dashboard-content">
             
-            <!-- ڈاکٹرز کی فہرست -->
+            <!-- Doctors List -->
             <div id="doctorsSection" class="dashboard-section">
-                <h2>ڈاکٹرز کی فہرست</h2>
+                <h2>Doctors List</h2>
                 
                 <div class="filter-bar">
                     <select id="specialtyFilter" onchange="filterDoctors()">
-                        <option value="">تمام سپیشلٹیز</option>
-                        <option value="دل">دل کے امراض</option>
-                        <option value="جلد">جلد کے امراض</option>
-                        <option value="بچے">بچوں کے امراض</option>
-                        <option value="خواتین">خواتین کے امراض</option>
-                        <option value="ہڈی">ہڈیوں کے امراض</option>
-                        <option value="آنکھ">آنکھوں کے امراض</option>
-                        <option value="جنرل">جنرل فزیشن</option>
+                        <option value="">All Specialties</option>
+                        <option value="Cardiology">Cardiology</option>
+                        <option value="Dermatology">Dermatology</option>
+                        <option value="Pediatrics">Pediatrics</option>
+                        <option value="Gynecology">Gynecology</option>
+                        <option value="Orthopedics">Orthopedics</option>
+                        <option value="Ophthalmology">Ophthalmology</option>
+                        <option value="General">General Physician</option>
                     </select>
-                    <input type="text" id="doctorSearch" placeholder="ڈاکٹر کا نام تلاش کریں..." onkeyup="filterDoctors()">
+                    <input type="text" id="doctorSearch" placeholder="Search by name..." onkeyup="filterDoctors()">
                 </div>
 
                 <div class="doctors-grid" id="doctorsGrid">
-                    <p>ڈاکٹرز لوڈ ہو رہے ہیں...</p>
+                    <p>Loading doctors...</p>
                 </div>
             </div>
 
-            <!-- اپوائنٹمنٹس -->
+            <!-- Appointments -->
             <div id="appointmentsSection" class="dashboard-section" style="display: none;">
-                <h2>میری اپوائنٹمنٹس</h2>
+                <h2>My Appointments</h2>
                 <div id="appointmentsList">
-                    <p>کوئی اپوائنٹمنٹ نہیں</p>
+                    <p>No appointments found</p>
                 </div>
             </div>
 
-            <!-- ہسٹری -->
+            <!-- History -->
             <div id="historySection" class="dashboard-section" style="display: none;">
-                <h2>میری مشاورت کی ہسٹری</h2>
+                <h2>Consultation History</h2>
                 <div id="historyList">
-                    <p>کوئی ریکارڈ نہیں</p>
+                    <p>No records found</p>
                 </div>
             </div>
 
-            <!-- پروفائل -->
+            <!-- Profile -->
             <div id="profileSection" class="dashboard-section" style="display: none;">
-                <h2>میرا پروفائل</h2>
+                <h2>My Profile</h2>
                 <div id="profileInfo">
-                    <p>پروفائل لوڈ ہو رہا ہے...</p>
+                    <p>Loading profile...</p>
                 </div>
             </div>
 
@@ -90,7 +90,7 @@
     <script>
         let allDoctors = [];
 
-        // چیک کریں کہ یوزر لاگ ان ہے
+        // Check if user is logged in
         firebase.auth().onAuthStateChanged((user) => {
             if (!user) {
                 window.location.href = 'patient-login.html';
@@ -104,7 +104,7 @@
             db.collection('patients').doc(user.uid).get()
                 .then((doc) => {
                     if (doc.exists) {
-                        document.getElementById('userNameDisplay').textContent = 'خوش آمدید، ' + doc.data().name;
+                        document.getElementById('userNameDisplay').textContent = 'Welcome, ' + doc.data().name;
                     }
                 });
         }
@@ -121,7 +121,7 @@
                     displayDoctors(allDoctors);
                 })
                 .catch((error) => {
-                    document.getElementById('doctorsGrid').innerHTML = '<p>ڈاکٹرز لوڈ کرنے میں مسئلہ</p>';
+                    document.getElementById('doctorsGrid').innerHTML = '<p>Error loading doctors</p>';
                 });
         }
 
@@ -129,7 +129,7 @@
             const grid = document.getElementById('doctorsGrid');
             
             if (doctors.length === 0) {
-                grid.innerHTML = '<p>کوئی ڈاکٹر نہیں ملا</p>';
+                grid.innerHTML = '<p>No doctors found</p>';
                 return;
             }
 
@@ -139,10 +139,10 @@
                     <h3>${doc.name}</h3>
                     <p class="specialty">${doc.specialty}</p>
                     <p class="qualification">${doc.qualification || ''}</p>
-                    <p class="fee">فیس: Rs. ${doc.fee}</p>
-                    <p class="experience">تجربہ: ${doc.experience || 'N/A'} سال</p>
+                    <p class="fee">Fee: Rs. ${doc.fee}</p>
+                    <p class="experience">Experience: ${doc.experience || 'N/A'} years</p>
                     <button onclick="bookAppointment('${doc.id}', '${doc.name}', ${doc.fee})" class="btn btn-primary btn-full">
-                        اپوائنٹمنٹ بک کریں
+                        Book Appointment
                     </button>
                 </div>
             `).join('');
@@ -166,10 +166,10 @@
         }
 
         function bookAppointment(doctorId, doctorName, fee) {
-            const date = prompt('تاریخ درج کریں (YYYY-MM-DD):');
+            const date = prompt('Enter date (YYYY-MM-DD):');
             if (!date) return;
             
-            const time = prompt('وقت درج کریں (جیسے: 10:00 AM):');
+            const time = prompt('Enter time (e.g., 10:00 AM):');
             if (!time) return;
 
             const user = firebase.auth().currentUser;
@@ -186,12 +186,12 @@
                 createdAt: firebase.firestore.FieldValue.serverTimestamp()
             })
             .then(() => {
-                alert('اپوائنٹمنٹ کامیابی سے بک ہو گئی!');
+                alert('Appointment booked successfully!');
                 showSection('appointments');
                 loadAppointments();
             })
             .catch((error) => {
-                alert('غلطی: ' + error.message);
+                alert('Error: ' + error.message);
             });
         }
 
@@ -207,7 +207,7 @@
                     const list = document.getElementById('appointmentsList');
                     
                     if (snapshot.empty) {
-                        list.innerHTML = '<p>کوئی اپوائنٹمنٹ نہیں</p>';
+                        list.innerHTML = '<p>No appointments found</p>';
                         return;
                     }
 
@@ -215,12 +215,12 @@
                         const data = doc.data();
                         return `
                             <div class="appointment-card">
-                                <h4>ڈاکٹر: ${data.doctorName}</h4>
-                                <p>تاریخ: ${data.date} - وقت: ${data.time}</p>
-                                <p>فیس: Rs. ${data.fee}</p>
-                                <p class="status status-${data.status}">اسٹیٹس: ${data.status}</p>
+                                <h4>Doctor: ${data.doctorName}</h4>
+                                <p>Date: ${data.date} - Time: ${data.time}</p>
+                                <p>Fee: Rs. ${data.fee}</p>
+                                <p class="status status-${data.status}">Status: ${data.status}</p>
                                 ${data.status === 'confirmed' ? 
-                                    `<a href="video-call.html?id=${doc.id}" class="btn btn-primary">ویڈیو کال شروع کریں</a>` : ''}
+                                    `<a href="video-call.html?id=${doc.id}" class="btn btn-primary">Start Video Call</a>` : ''}
                             </div>
                         `;
                     }).join('');
@@ -247,10 +247,10 @@
                     if (doc.exists) {
                         const data = doc.data();
                         document.getElementById('profileInfo').innerHTML = `
-                            <p><strong>نام:</strong> ${data.name}</p>
-                            <p><strong>فون:</strong> ${data.phone}</p>
-                            <p><strong>عمر:</strong> ${data.age}</p>
-                            <p><strong>جنس:</strong> ${data.gender === 'male' ? 'مرد' : data.gender === 'female' ? 'خاتون' : 'دیگر'}</p>
+                            <p><strong>Name:</strong> ${data.name}</p>
+                            <p><strong>Phone:</strong> ${data.phone}</p>
+                            <p><strong>Age:</strong> ${data.age}</p>
+                            <p><strong>Gender:</strong> ${data.gender === 'male' ? 'Male' : data.gender === 'female' ? 'Female' : 'Other'}</p>
                         `;
                     }
                 });
