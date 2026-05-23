@@ -111,19 +111,19 @@
                 <div class="input-group">
                     <label>Upload Degree / Certificate *</label>
                     <input type="file" id="degreeFile" accept=".jpg,.jpeg,.png,.pdf" onchange="previewDegree()" style="padding: 10px;">
-                    <small style="color: #666;">Upload MBBS/FCPS degree or PMDC certificate (JPG, PNG, PDF)</small>
+                    <small style="color: #666;">Upload MBBS/FCPS degree or PMDC certificate (JPG, PNG, PDF - Max 500KB)</small>
                     <div id="degreePreview" style="margin-top: 10px;"></div>
-                    <progress id="uploadProgress" value="0" max="100" style="width: 100%; height: 8px; border-radius: 4px; display: none;"></progress>
                 </div>
                 
                 <!-- Profile Photo Upload -->
                 <div class="input-group">
                     <label>Profile Photo (Optional)</label>
                     <input type="file" id="photoFile" accept=".jpg,.jpeg,.png" onchange="previewPhoto()" style="padding: 10px;">
+                    <small style="color: #666;">Upload profile photo (JPG, PNG - Max 200KB)</small>
                     <div id="photoPreview" style="margin-top: 10px;"></div>
                 </div>
                 
-                <button onclick="registerDoctor()" class="btn btn-primary btn-full">
+                <button onclick="registerDoctor()" class="btn btn-primary btn-full" id="regBtn">
                     Submit Registration
                 </button>
                 <p style="text-align: center; margin-top: 10px; font-size: 12px; color: #666;">
@@ -143,108 +143,117 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
     
     <!-- Firebase Config -->
     <script src="js/firebase-config.js"></script>
     
     <!-- JavaScript -->
     <script>
-        // ========== UTILITY FUNCTIONS ==========
+        // ==================== UTILITY FUNCTIONS ====================
         
-        function showMessage(msg, type = 'info') {
-            const box = document.getElementById('messageBox');
+        function showMessage(msg, type) {
+            type = type || 'info';
+            var box = document.getElementById('messageBox');
             box.style.display = 'block';
             box.textContent = msg;
             box.className = 'message-box ' + type;
-            setTimeout(() => box.style.display = 'none', 5000);
+            setTimeout(function() {
+                box.style.display = 'none';
+            }, 5000);
         }
 
         function showRegister() {
             document.getElementById('loginStep').style.display = 'none';
             document.getElementById('registerStep').style.display = 'block';
+            document.getElementById('messageBox').style.display = 'none';
         }
 
         function showLogin() {
             document.getElementById('registerStep').style.display = 'none';
             document.getElementById('loginStep').style.display = 'block';
+            document.getElementById('messageBox').style.display = 'none';
         }
 
-        // ========== DEGREE PREVIEW ==========
+        // ==================== DEGREE PREVIEW ====================
         
         function previewDegree() {
-            const file = document.getElementById('degreeFile').files[0];
-            const preview = document.getElementById('degreePreview');
+            var file = document.getElementById('degreeFile').files[0];
+            var preview = document.getElementById('degreePreview');
             
             if (!file) {
                 preview.innerHTML = '';
+                return;
+            }
+
+            // Check file size (max 500KB)
+            if (file.size > 500 * 1024) {
+                preview.innerHTML = '<p style="color: red;">⚠️ File too large! Please upload file under 500KB.</p>';
+                document.getElementById('degreeFile').value = '';
                 return;
             }
 
             if (file.type.startsWith('image/')) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    preview.innerHTML = `
-                        <img src="${e.target.result}" style="max-width: 200px; border-radius: 10px; border: 1px solid #ddd;">
-                        <p style="font-size: 12px;">📄 ${file.name} (${(file.size / 1024).toFixed(1)} KB)</p>
-                    `;
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.innerHTML = '<img src="' + e.target.result + '" style="max-width: 200px; border-radius: 10px; border: 1px solid #ddd;"><p style="font-size: 12px;">📄 ' + file.name + ' (' + (file.size / 1024).toFixed(1) + ' KB)</p>';
                 };
                 reader.readAsDataURL(file);
             } else if (file.type === 'application/pdf') {
-                preview.innerHTML = `
-                    <p style="padding: 10px; background: #fef3c7; border-radius: 8px;">
-                        📄 PDF File: ${file.name} (${(file.size / 1024).toFixed(1)} KB)
-                    </p>
-                `;
+                preview.innerHTML = '<p style="padding: 10px; background: #fef3c7; border-radius: 8px;">📄 PDF File: ' + file.name + ' (' + (file.size / 1024).toFixed(1) + ' KB)</p>';
             } else {
-                preview.innerHTML = `<p>📄 ${file.name} (${(file.size / 1024).toFixed(1)} KB)</p>`;
+                preview.innerHTML = '<p>📄 ' + file.name + ' (' + (file.size / 1024).toFixed(1) + ' KB)</p>';
             }
         }
 
         function previewPhoto() {
-            const file = document.getElementById('photoFile').files[0];
-            const preview = document.getElementById('photoPreview');
+            var file = document.getElementById('photoFile').files[0];
+            var preview = document.getElementById('photoPreview');
             
             if (!file) {
                 preview.innerHTML = '';
                 return;
             }
 
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                preview.innerHTML = `
-                    <img src="${e.target.result}" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary);">
-                    <p style="font-size: 12px;">${file.name}</p>
-                `;
+            // Check file size (max 200KB)
+            if (file.size > 200 * 1024) {
+                preview.innerHTML = '<p style="color: red;">⚠️ File too large! Please upload photo under 200KB.</p>';
+                document.getElementById('photoFile').value = '';
+                return;
+            }
+
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                preview.innerHTML = '<img src="' + e.target.result + '" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary);"><p style="font-size: 12px;">' + file.name + '</p>';
             };
             reader.readAsDataURL(file);
         }
 
-        // ========== DOCTOR LOGIN ==========
+        // ==================== DOCTOR LOGIN ====================
         
         function loginDoctor() {
-            const email = document.getElementById('loginEmail').value.trim();
-            const password = document.getElementById('loginPassword').value;
+            var email = document.getElementById('loginEmail').value.trim();
+            var password = document.getElementById('loginPassword').value;
 
             if (!email || !password) {
                 showMessage('Please enter email and password', 'error');
                 return;
             }
 
-            const btn = document.getElementById('loginBtn');
+            var btn = document.getElementById('loginBtn');
             btn.disabled = true;
             btn.textContent = 'Logging in...';
 
             firebase.auth().signInWithEmailAndPassword(email, password)
-                .then((result) => {
-                    const user = result.user;
-                    // Check if doctor exists and is approved
+                .then(function(result) {
+                    var user = result.user;
                     return db.collection('doctors').doc(user.uid).get();
                 })
-                .then((doc) => {
+                .then(function(doc) {
                     if (doc.exists && doc.data().isApproved) {
                         showMessage('Login successful! Redirecting...', 'success');
-                        setTimeout(() => window.location.href = 'doctor-dashboard.html', 1000);
+                        setTimeout(function() {
+                            window.location.href = 'doctor-dashboard.html';
+                        }, 1000);
                     } else if (doc.exists && !doc.data().isApproved) {
                         showMessage('Your account is pending admin approval. Please wait.', 'warning');
                         firebase.auth().signOut();
@@ -253,8 +262,8 @@
                         firebase.auth().signOut();
                     }
                 })
-                .catch((error) => {
-                    let msg = 'Login failed!';
+                .catch(function(error) {
+                    var msg = 'Login failed!';
                     if (error.code === 'auth/user-not-found') {
                         msg = 'No account found. Please register first.';
                     } else if (error.code === 'auth/wrong-password') {
@@ -266,28 +275,28 @@
                     }
                     showMessage(msg, 'error');
                 })
-                .finally(() => {
+                .finally(function() {
                     btn.disabled = false;
                     btn.textContent = 'Login';
                 });
         }
 
-        // ========== DOCTOR REGISTRATION ==========
+        // ==================== DOCTOR REGISTRATION ====================
         
         function registerDoctor() {
             // Get all values
-            const name = document.getElementById('fullName').value.trim();
-            const email = document.getElementById('regEmail').value.trim();
-            const phone = document.getElementById('regPhone').value.trim();
-            const password = document.getElementById('regPassword').value;
-            const specialty = document.getElementById('specialty').value;
-            const qualification = document.getElementById('qualification').value.trim();
-            const pmdcNumber = document.getElementById('pmdcNumber').value.trim();
-            const experience = document.getElementById('experience').value;
-            const cnic = document.getElementById('cnic').value.trim();
-            const fee = document.getElementById('fee').value;
-            const degreeFile = document.getElementById('degreeFile').files[0];
-            const photoFile = document.getElementById('photoFile').files[0];
+            var name = document.getElementById('fullName').value.trim();
+            var email = document.getElementById('regEmail').value.trim();
+            var phone = document.getElementById('regPhone').value.trim();
+            var password = document.getElementById('regPassword').value;
+            var specialty = document.getElementById('specialty').value;
+            var qualification = document.getElementById('qualification').value.trim();
+            var pmdcNumber = document.getElementById('pmdcNumber').value.trim();
+            var experience = document.getElementById('experience').value;
+            var cnic = document.getElementById('cnic').value.trim();
+            var fee = document.getElementById('fee').value;
+            var degreeFile = document.getElementById('degreeFile').files[0];
+            var photoFile = document.getElementById('photoFile').files[0];
 
             // Validation
             if (!name || !email || !phone || !password || !specialty || !qualification || !pmdcNumber || !cnic || !fee) {
@@ -310,87 +319,92 @@
                 return;
             }
 
-            // Show progress bar
-            const progressBar = document.getElementById('uploadProgress');
-            progressBar.style.display = 'block';
-            progressBar.value = 0;
+            // Disable button
+            var btn = document.getElementById('regBtn');
+            btn.disabled = true;
+            btn.textContent = 'Uploading & Registering...';
 
-            // Upload degree file to Firebase Storage
-            const storageRef = firebase.storage().ref();
-            const degreeRef = storageRef.child('doctor-degrees/' + Date.now() + '_' + degreeFile.name);
-            const uploadTask = degreeRef.put(degreeFile);
+            // Convert file to Base64
+            function convertToBase64(file) {
+                return new Promise(function(resolve, reject) {
+                    var reader = new FileReader();
+                    reader.onload = function() {
+                        resolve(reader.result);
+                    };
+                    reader.onerror = function(error) {
+                        reject(error);
+                    };
+                    reader.readAsDataURL(file);
+                });
+            }
 
-            uploadTask.on('state_changed',
-                (snapshot) => {
-                    // Progress
-                    const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                    progressBar.value = progress;
-                },
-                (error) => {
-                    // Error
-                    progressBar.style.display = 'none';
-                    showMessage('Upload failed: ' + error.message, 'error');
-                },
-                () => {
-                    // Upload complete - get download URL
-                    uploadTask.snapshot.ref.getDownloadURL().then((degreeURL) => {
-                        
-                        // Upload photo if selected
-                        let photoPromise = Promise.resolve('');
-                        
-                        if (photoFile) {
-                            const photoRef = storageRef.child('doctor-photos/' + Date.now() + '_' + photoFile.name);
-                            photoPromise = photoRef.put(photoFile)
-                                .then(snapshot => snapshot.ref.getDownloadURL());
-                        }
-
-                        photoPromise.then((photoURL) => {
-                            
-                            // Create user account
-                            firebase.auth().createUserWithEmailAndPassword(email, password)
-                                .then((result) => {
-                                    const user = result.user;
-                                    
-                                    // Save doctor data to Firestore
-                                    return db.collection('doctors').doc(user.uid).set({
-                                        name: name,
-                                        email: email,
-                                        phone: '+92' + phone,
-                                        specialty: specialty,
-                                        qualification: qualification,
-                                        pmdcNumber: pmdcNumber,
-                                        experience: parseInt(experience) || 0,
-                                        cnic: cnic,
-                                        fee: parseInt(fee),
-                                        degreeURL: degreeURL,
-                                        photoURL: photoURL || '',
-                                        isApproved: false,
-                                        walletBalance: 0,
-                                        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-                                    });
-                                })
-                                .then(() => {
-                                    progressBar.style.display = 'none';
-                                    showMessage('Registration submitted! Admin will verify your documents.', 'success');
-                                    setTimeout(() => window.location.href = 'doctor-dashboard.html', 2000);
-                                })
-                                .catch((error) => {
-                                    progressBar.style.display = 'none';
-                                    let msg = 'Registration failed!';
-                                    if (error.code === 'auth/email-already-in-use') {
-                                        msg = 'This email is already registered! Please login instead.';
-                                    } else if (error.code === 'auth/weak-password') {
-                                        msg = 'Password is too weak! Use at least 6 characters.';
-                                    } else if (error.code === 'auth/invalid-email') {
-                                        msg = 'Invalid email address!';
-                                    }
-                                    showMessage(msg, 'error');
-                                });
+            // Convert degree file first
+            convertToBase64(degreeFile)
+                .then(function(degreeBase64) {
+                    // If photo exists, convert it too
+                    if (photoFile) {
+                        return convertToBase64(photoFile).then(function(photoBase64) {
+                            return {
+                                degreeBase64: degreeBase64,
+                                photoBase64: photoBase64
+                            };
                         });
-                    });
-                }
-            );
+                    }
+                    return {
+                        degreeBase64: degreeBase64,
+                        photoBase64: ''
+                    };
+                })
+                .then(function(result) {
+                    // Create user account
+                    return firebase.auth().createUserWithEmailAndPassword(email, password)
+                        .then(function(userResult) {
+                            var user = userResult.user;
+                            
+                            // Save doctor data to Firestore
+                            return db.collection('doctors').doc(user.uid).set({
+                                name: name,
+                                email: email,
+                                phone: '+92' + phone,
+                                specialty: specialty,
+                                qualification: qualification,
+                                pmdcNumber: pmdcNumber,
+                                experience: parseInt(experience) || 0,
+                                cnic: cnic,
+                                fee: parseInt(fee),
+                                degreeFile: result.degreeBase64,
+                                degreeFileName: degreeFile.name,
+                                photoURL: result.photoBase64,
+                                isApproved: false,
+                                walletBalance: 0,
+                                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                            });
+                        });
+                })
+                .then(function() {
+                    showMessage('Registration submitted successfully! Admin will verify your documents.', 'success');
+                    setTimeout(function() {
+                        window.location.href = 'doctor-dashboard.html';
+                    }, 2000);
+                })
+                .catch(function(error) {
+                    var msg = 'Registration failed!';
+                    if (error.code === 'auth/email-already-in-use') {
+                        msg = 'This email is already registered! Please login instead.';
+                    } else if (error.code === 'auth/weak-password') {
+                        msg = 'Password is too weak! Use at least 6 characters.';
+                    } else if (error.code === 'auth/invalid-email') {
+                        msg = 'Invalid email address!';
+                    } else if (error.code === 'auth/too-many-requests') {
+                        msg = 'Too many attempts. Please try again later.';
+                    } else {
+                        msg = error.message;
+                    }
+                    showMessage(msg, 'error');
+                    btn.disabled = false;
+                    btn.textContent = 'Submit Registration';
+                });
         }
     </script>
 </body>
