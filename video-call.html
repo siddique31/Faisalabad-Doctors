@@ -11,6 +11,9 @@
             --warning: #f59e0b;
             --info: #3b82f6;
             --white: #ffffff;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-700: #374151;
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -19,21 +22,27 @@
             height: 100vh;
             overflow: hidden;
         }
+
         .call-container {
             display: flex;
-            flex-direction: column;
             height: 100vh;
         }
+
+        /* Video Area */
         .video-area {
             flex: 1;
-            position: relative;
+            display: flex;
+            flex-direction: column;
             background: #0f0f23;
+            position: relative;
         }
+
         #remote-video {
             width: 100%;
             height: 100%;
             object-fit: cover;
         }
+
         #local-video {
             position: absolute;
             bottom: 100px;
@@ -46,6 +55,7 @@
             object-fit: cover;
             background: #2a2a3e;
         }
+
         .call-info {
             position: absolute;
             top: 20px;
@@ -53,6 +63,7 @@
             color: var(--white);
             z-index: 5;
         }
+
         .call-timer {
             position: absolute;
             top: 20px;
@@ -62,21 +73,25 @@
             font-size: 18px;
             z-index: 5;
         }
+
+        /* Controls */
         .call-controls {
             display: flex;
-            gap: 20px;
+            gap: 15px;
             justify-content: center;
             align-items: center;
-            padding: 20px;
+            padding: 15px;
             background: rgba(0,0,0,0.5);
             backdrop-filter: blur(10px);
+            flex-wrap: wrap;
         }
+
         .control-btn {
-            width: 50px;
-            height: 50px;
+            width: 45px;
+            height: 45px;
             border-radius: 50%;
             border: none;
-            font-size: 20px;
+            font-size: 18px;
             cursor: pointer;
             transition: all 0.3s;
             color: white;
@@ -84,30 +99,171 @@
         .control-btn:hover { transform: scale(1.1); }
         .control-btn.end-call {
             background: var(--danger);
-            width: 60px;
-            height: 60px;
-            font-size: 26px;
+            width: 55px;
+            height: 55px;
+            font-size: 24px;
         }
         .control-btn.mute { background: #374151; }
         .control-btn.mute.active { background: var(--warning); }
         .control-btn.video-toggle { background: #374151; }
         .control-btn.video-toggle.active { background: var(--warning); }
         .control-btn.switch-camera { background: var(--info); }
+        .control-btn.chat-toggle { background: #374151; }
+        .control-btn.chat-toggle.active { background: var(--primary); }
+        
         .control-group {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 5px;
+            gap: 3px;
         }
         .control-label {
             color: white;
+            font-size: 9px;
+        }
+
+        /* Chat Panel */
+        .chat-panel {
+            width: 320px;
+            background: var(--white);
+            display: none;
+            flex-direction: column;
+            border-left: 1px solid var(--gray-200);
+        }
+        .chat-panel.open {
+            display: flex;
+        }
+
+        .chat-header {
+            padding: 15px;
+            border-bottom: 1px solid var(--gray-200);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--gray-100);
+        }
+        .chat-header h3 { margin: 0; font-size: 16px; color: var(--gray-700); }
+        .close-chat {
+            background: none;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .chat-message {
+            max-width: 85%;
+            padding: 10px 14px;
+            border-radius: 18px;
+            font-size: 13px;
+            line-height: 1.4;
+            word-wrap: break-word;
+        }
+
+        .chat-message.sent {
+            background: var(--primary);
+            color: var(--white);
+            align-self: flex-end;
+            border-bottom-right-radius: 5px;
+        }
+
+        .chat-message.received {
+            background: var(--gray-100);
+            color: var(--gray-700);
+            align-self: flex-start;
+            border-bottom-left-radius: 5px;
+        }
+
+        .chat-message .msg-time {
+            font-size: 9px;
+            opacity: 0.7;
+            display: block;
+            margin-top: 4px;
+        }
+
+        .chat-message .msg-sender {
             font-size: 10px;
+            font-weight: 600;
+            display: block;
+            margin-bottom: 3px;
+        }
+
+        .chat-input-area {
+            padding: 12px;
+            border-top: 1px solid var(--gray-200);
+            display: flex;
+            gap: 8px;
+        }
+
+        .chat-input-area input {
+            flex: 1;
+            padding: 10px 15px;
+            border: 1px solid var(--gray-200);
+            border-radius: 25px;
+            font-size: 13px;
+            font-family: inherit;
+            outline: none;
+        }
+
+        .send-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .new-message-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: var(--danger);
+            color: white;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            font-size: 10px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        @media (max-width: 768px) {
+            .chat-panel {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                height: 55vh;
+                width: 100%;
+                border-radius: 20px 20px 0 0;
+                z-index: 100;
+            }
+            #local-video {
+                width: 100px;
+                height: 75px;
+                bottom: 90px;
+                right: 10px;
+            }
         }
     </style>
 </head>
 <body>
     
     <div class="call-container">
+        
+        <!-- Video Area -->
         <div class="video-area">
             <video id="remote-video" autoplay playsinline></video>
             <video id="local-video" autoplay playsinline muted></video>
@@ -118,35 +274,65 @@
             </div>
             
             <div class="call-timer" id="callTimer">00:00</div>
+            
+            <!-- Controls -->
+            <div class="call-controls">
+                <div class="control-group">
+                    <button class="control-btn mute" id="muteBtn" onclick="toggleMute()">🎤</button>
+                    <span class="control-label">Mute</span>
+                </div>
+                <div class="control-group">
+                    <button class="control-btn video-toggle" id="videoBtn" onclick="toggleVideo()">📹</button>
+                    <span class="control-label">Video</span>
+                </div>
+                <div class="control-group">
+                    <button class="control-btn end-call" onclick="endCall()">📞</button>
+                    <span class="control-label">End</span>
+                </div>
+                <div class="control-group">
+                    <button class="control-btn switch-camera" onclick="switchCamera()">🔄</button>
+                    <span class="control-label">Flip</span>
+                </div>
+                <div class="control-group" style="position: relative;">
+                    <button class="control-btn chat-toggle" id="chatBtn" onclick="toggleChat()">💬</button>
+                    <span class="new-message-badge" id="newMsgBadge">1</span>
+                    <span class="control-label">Chat</span>
+                </div>
+            </div>
         </div>
         
-        <div class="call-controls">
-            <div class="control-group">
-                <button class="control-btn mute" id="muteBtn" onclick="toggleMute()">🎤</button>
-                <span class="control-label">Mute</span>
+        <!-- Chat Panel -->
+        <div class="chat-panel" id="chatPanel">
+            <div class="chat-header">
+                <h3>💬 Chat</h3>
+                <button class="close-chat" onclick="toggleChat()">✕</button>
             </div>
-            <div class="control-group">
-                <button class="control-btn video-toggle" id="videoBtn" onclick="toggleVideo()">📹</button>
-                <span class="control-label">Video</span>
+            <div class="chat-messages" id="chatMessages">
+                <p style="text-align: center; color: #999; margin-top: 80px; font-size: 13px;">
+                    💬 No messages yet<br>Start chatting!
+                </p>
             </div>
-            <div class="control-group">
-                <button class="control-btn end-call" onclick="endCall()">📞</button>
-                <span class="control-label">End</span>
-            </div>
-            <div class="control-group">
-                <button class="control-btn switch-camera" onclick="switchCamera()">🔄</button>
-                <span class="control-label">Flip</span>
+            <div class="chat-input-area">
+                <input type="text" id="chatInput" placeholder="Type a message..." onkeypress="if(event.key==='Enter') sendMessage()">
+                <button class="send-btn" onclick="sendMessage()">📤</button>
             </div>
         </div>
+        
     </div>
 
+    <!-- Agora SDK -->
     <script src="https://download.agora.io/sdk/release/AgoraRTC_N-4.20.0.js"></script>
+    
+    <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
     <script src="js/firebase-config.js"></script>
     
     <script>
-        // Agora Configuration - Testing Mode (No Token Needed)
+        // ==========================================
+        // AGORA VIDEO CALL + CHAT
+        // ==========================================
+        
         const APP_ID = 'b808df55edd24f23ac506f9dd7e67b18';
         const TOKEN = null;
         
@@ -155,13 +341,17 @@
         let localVideoTrack = null;
         let isMuted = false;
         let isVideoOff = false;
+        let isChatOpen = false;
         let facingMode = 'user';
         let callStartTime = null;
         let timerInterval = null;
+        let myName = 'User';
         
         const params = new URLSearchParams(window.location.search);
         const appointmentId = params.get('id');
         const channelName = 'Gojra-' + (appointmentId || Date.now());
+        
+        // ==================== INIT ====================
         
         async function initCall() {
             if (!appointmentId) {
@@ -169,6 +359,19 @@
                 return;
             }
             
+            // Get user info
+            const user = firebase.auth().currentUser;
+            if (user) {
+                try {
+                    const patientDoc = await db.collection('patients').doc(user.uid).get();
+                    if (patientDoc.exists) myName = patientDoc.data().name;
+                    
+                    const doctorDoc = await db.collection('doctors').doc(user.uid).get();
+                    if (doctorDoc.exists) myName = 'Dr. ' + doctorDoc.data().name;
+                } catch(e) {}
+            }
+            
+            // Get appointment info
             try {
                 const doc = await db.collection('appointments').doc(appointmentId).get();
                 if (doc.exists) {
@@ -176,16 +379,33 @@
                 }
             } catch(e) {}
             
+            // Load existing messages
+            loadMessages();
+            
+            // Listen for new messages
+            db.collection('appointments').doc(appointmentId).collection('messages')
+                .orderBy('timestamp', 'asc')
+                .onSnapshot(function(snapshot) {
+                    snapshot.docChanges().forEach(function(change) {
+                        if (change.type === 'added') {
+                            const msg = change.doc.data();
+                            if (msg.sender !== myName) {
+                                addChatMessage(msg.text, 'received', msg.timestamp, msg.sender);
+                                if (!isChatOpen) {
+                                    document.getElementById('newMsgBadge').style.display = 'flex';
+                                }
+                            }
+                        }
+                    });
+                });
+            
+            // Init Agora
             client = AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' });
             
             client.on('user-published', async (user, mediaType) => {
                 await client.subscribe(user, mediaType);
-                if (mediaType === 'video') {
-                    user.videoTrack.play('remote-video');
-                }
-                if (mediaType === 'audio') {
-                    user.audioTrack.play();
-                }
+                if (mediaType === 'video') user.videoTrack.play('remote-video');
+                if (mediaType === 'audio') user.audioTrack.play();
                 document.getElementById('callStatus').textContent = 'Connected ✅';
             });
             
@@ -213,57 +433,113 @@
             }
         }
         
+        // ==================== CHAT ====================
+        
+        function toggleChat() {
+            isChatOpen = !isChatOpen;
+            const panel = document.getElementById('chatPanel');
+            const btn = document.getElementById('chatBtn');
+            
+            if (isChatOpen) {
+                panel.classList.add('open');
+                btn.classList.add('active');
+                document.getElementById('newMsgBadge').style.display = 'none';
+            } else {
+                panel.classList.remove('open');
+                btn.classList.remove('active');
+            }
+        }
+        
+        function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const text = input.value.trim();
+            if (!text) return;
+            
+            const now = new Date();
+            
+            // Add to local chat
+            addChatMessage(text, 'sent', now, 'You');
+            
+            // Save to Firestore
+            db.collection('appointments').doc(appointmentId).collection('messages').add({
+                text: text,
+                sender: myName,
+                timestamp: firebase.firestore.Timestamp.fromDate(now)
+            }).catch(e => console.error('Save error:', e));
+            
+            input.value = '';
+            input.focus();
+        }
+        
+        function addChatMessage(text, type, timestamp, sender) {
+            const messagesDiv = document.getElementById('chatMessages');
+            
+            // Remove placeholder
+            const placeholder = messagesDiv.querySelector('p');
+            if (placeholder) placeholder.remove();
+            
+            const time = timestamp instanceof Date ? 
+                timestamp.toLocaleTimeString('en-PK', { hour: '2-digit', minute: '2-digit' }) :
+                new Date(timestamp.toDate()).toLocaleTimeString('en-PK', { hour: '2-digit', minute: '2-digit' });
+            
+            const msgDiv = document.createElement('div');
+            msgDiv.className = 'chat-message ' + type;
+            msgDiv.innerHTML = `
+                <span class="msg-sender">${sender}</span>
+                ${text}
+                <span class="msg-time">${time}</span>
+            `;
+            
+            messagesDiv.appendChild(msgDiv);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+        
+        function loadMessages() {
+            db.collection('appointments').doc(appointmentId).collection('messages')
+                .orderBy('timestamp', 'asc')
+                .get()
+                .then(function(snapshot) {
+                    snapshot.forEach(function(doc) {
+                        const msg = doc.data();
+                        const type = msg.sender === myName ? 'sent' : 'received';
+                        addChatMessage(msg.text, type, msg.timestamp, msg.sender);
+                    });
+                });
+        }
+        
+        // ==================== CONTROLS ====================
+        
         async function toggleMute() {
             if (!localAudioTrack) return;
             isMuted = !isMuted;
             const btn = document.getElementById('muteBtn');
             await localAudioTrack.setEnabled(!isMuted);
-            if (isMuted) {
-                btn.classList.add('active');
-                btn.textContent = '🔇';
-            } else {
-                btn.classList.remove('active');
-                btn.textContent = '🎤';
-            }
+            btn.classList.toggle('active', isMuted);
+            btn.textContent = isMuted ? '🔇' : '🎤';
         }
         
         async function toggleVideo() {
             if (!localVideoTrack) return;
             isVideoOff = !isVideoOff;
             const btn = document.getElementById('videoBtn');
-            const localVideo = document.getElementById('local-video');
             await localVideoTrack.setEnabled(!isVideoOff);
-            if (isVideoOff) {
-                btn.classList.add('active');
-                btn.textContent = '📷';
-                localVideo.style.display = 'none';
-            } else {
-                btn.classList.remove('active');
-                btn.textContent = '📹';
-                localVideo.style.display = 'block';
-            }
+            btn.classList.toggle('active', isVideoOff);
+            btn.textContent = isVideoOff ? '📷' : '📹';
+            document.getElementById('local-video').style.display = isVideoOff ? 'none' : 'block';
         }
         
         async function switchCamera() {
             if (!localVideoTrack) return;
             facingMode = facingMode === 'user' ? 'environment' : 'user';
-            
             localVideoTrack.stop();
             localVideoTrack.close();
-            
-            localVideoTrack = await AgoraRTC.createCameraVideoTrack({
-                facingMode: facingMode,
-                encoderConfig: '720p'
-            });
-            
+            localVideoTrack = await AgoraRTC.createCameraVideoTrack({ facingMode, encoderConfig: '720p' });
             await client.unpublish([localVideoTrack]);
             localVideoTrack.play('local-video');
-            
             if (isVideoOff) {
                 await localVideoTrack.setEnabled(false);
                 document.getElementById('local-video').style.display = 'none';
             }
-            
             await client.publish([localVideoTrack]);
         }
         
@@ -283,15 +559,12 @@
             if (localAudioTrack) { localAudioTrack.stop(); localAudioTrack.close(); }
             if (localVideoTrack) { localVideoTrack.stop(); localVideoTrack.close(); }
             if (client) await client.leave();
-            
             if (appointmentId) {
                 db.collection('appointments').doc(appointmentId).update({
                     status: 'completed',
-                    callType: 'video',
                     endedAt: firebase.firestore.FieldValue.serverTimestamp()
                 }).catch(e => {});
             }
-            
             window.location.href = 'doctor-dashboard.html';
         }
         
