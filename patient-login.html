@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="ur" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مریض لاگ ان - گوجرہ ڈاکٹرز</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="auth-page">
+    
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="auth-header">
+                <a href="index.html" class="back-btn">← واپس</a>
+                <div class="auth-logo">⚕️</div>
+                <h2>مریض لاگ ان</h2>
+                <p>اپنا فون نمبر درج کریں</p>
+            </div>
+
+            <!-- Step 1: فون نمبر -->
+            <div id="phoneStep" class="auth-form">
+                <div class="input-group">
+                    <label>فون نمبر</label>
+                    <div class="phone-input">
+                        <span class="country-code">+92</span>
+                        <input type="tel" id="phoneNumber" placeholder="3XX-XXXXXXX" maxlength="10">
+                    </div>
+                </div>
+                <button onclick="sendOTP()" class="btn btn-primary btn-full" id="sendOtpBtn">
+                    OTP حاصل کریں
+                </button>
+                <p class="auth-note">نیا اکاؤنٹ بنے گا اگر پہلے سے موجود نہیں</p>
+            </div>
+
+            <!-- Step 2: OTP -->
+            <div id="otpStep" class="auth-form" style="display: none;">
+                <p class="otp-sent-to">OTP بھیج دیا گیا: <span id="sentTo"></span></p>
+                <div class="input-group">
+                    <label>OTP کوڈ</label>
+                    <input type="text" id="otpCode" placeholder="------" maxlength="6" class="otp-input">
+                </div>
+                <button onclick="verifyOTP()" class="btn btn-primary btn-full" id="verifyOtpBtn">
+                    تصدیق کریں
+                </button>
+                <button onclick="goBackToPhone()" class="btn btn-outline btn-full" style="margin-top: 10px;">
+                    نمبر تبدیل کریں
+                </button>
+            </div>
+
+            <!-- Step 3: رجسٹریشن (نئے مریض کے لیے) -->
+            <div id="registerStep" class="auth-form" style="display: none;">
+                <div class="input-group">
+                    <label>پورا نام</label>
+                    <input type="text" id="fullName" placeholder="اپنا نام لکھیں">
+                </div>
+                <div class="input-group">
+                    <label>عمر</label>
+                    <input type="number" id="age" placeholder="عمر" min="1" max="120">
+                </div>
+                <div class="input-group">
+                    <label>جنس</label>
+                    <select id="gender">
+                        <option value="">منتخب کریں</option>
+                        <option value="male">مرد</option>
+                        <option value="female">خاتون</option>
+                        <option value="other">دیگر</option>
+                    </select>
+                </div>
+                <button onclick="completeRegistration()" class="btn btn-primary btn-full">
+                    رجسٹریشن مکمل کریں
+                </button>
+            </div>
+
+            <div id="messageBox" class="message-box" style="display: none;"></div>
+        </div>
+    </div>
+
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+    
+    <script src="js/firebase-config.js"></script>
+    <script>
+        let currentVerificationId = '';
+        let currentPhoneNumber = '';
+
+        function showMessage(msg, type = 'info') {
+            const box = document.getElementById('messageBox');
+            box.style.display = 'block';
+            box.textContent = msg;
+            box.className = 'message-box ' + type;
+            setTimeout(() => box.style.display = 'none', 5000);
+        }
+
+        function sendOTP() {
+            const phone = document.getElementById('phoneNumber').value.trim();
+            
+            if (phone.length < 10) {
+                showMessage('براہ کرم درست فون نمبر درج کریں', 'error');
+                return;
+            }
+
+            currentPhoneNumber = '+92' + phone;
+            document.getElementById('sentTo').textContent = currentPhoneNumber;
+            
+            const btn = document.getElementById('sendOtpBtn');
+            btn.disabled = true;
+            btn.textContent = 'OTP بھیج رہے ہیں...';
+
+            // Firebase OTP بھیجیں
+            firebase.auth().signInWithPhoneNumber(currentPhoneNumber, window.recaptchaVerifier)
+                .then((confirmationResult) => {
+                    currentVerificationId = confirmationResult.verificationId;
+                    document.getElementById('phoneStep').style.display = 'none';
+                    document.getElementById('otpStep').style.display = 'block';
+                    showMessage('OTP کامیابی سے بھیج دیا گیا!', 'success');
+                })
+                .catch((error) => {
+                    showMessage('غلطی: ' + error.message, 'error');
+                })
+                .finally(() => {
+                    btn.disabled = false;
+                    btn.textContent = 'OTP حاصل کریں';
+                });
+        }
+
+        function verifyOTP() {
+            const otp = document.getElementById('otpCode').value.trim();
+            
+            if (otp.length !== 6) {
+                showMessage('براہ کرم 6 ہندسوں کا OTP درج کریں', 'error');
+                return;
+            }
+
+            const btn = document.getElementById('verifyOtpBtn');
+            btn.disabled = true;
+            btn.textContent = 'تصدیق ہو رہی ہے...';
+
+            const credential = firebase.auth.PhoneAuthProvider.credential(currentVerificationId, otp);
+            
+            firebase.auth().signInWithCredential(credential)
+                .then((result) => {
+                    const user = result.user;
+                    // چیک کریں کہ نیا یوزر ہے یا پرانا
+                    return db.collection('patients').doc(user.uid).get();
+                })
+                .then((doc) => {
+                    if (doc.exists) {
+                        // پرانا یوزر - ہوم پر بھیجیں
+                        showMessage('لاگ ان کامیاب!', 'success');
+                        setTimeout(() => window.location.href = 'patient-home.html', 1000);
+                    } else {
+                        // نیا یوزر - رجسٹریشن فارم دکھائیں
+                        document.getElementById('otpStep').style.display = 'none';
+                        document.getElementById('registerStep').style.display = 'block';
+                    }
+                })
+                .catch((error) => {
+                    showMessage('غلط OTP: ' + error.message, 'error');
+                })
+                .finally(() => {
+                    btn.disabled = false;
+                    btn.textContent = 'تصدیق کریں';
+                });
+        }
+
+        function completeRegistration() {
+            const user = firebase.auth().currentUser;
+            if (!user) return;
+
+            const name = document.getElementById('fullName').value.trim();
+            const age = document.getElementById('age').value;
+            const gender = document.getElementById('gender').value;
+
+            if (!name || !age || !gender) {
+                showMessage('براہ کرم تمام فیلڈز پُر کریں', 'error');
+                return;
+            }
+
+            db.collection('patients').doc(user.uid).set({
+                name: name,
+                phone: currentPhoneNumber,
+                age: parseInt(age),
+                gender: gender,
+                email: user.email || '',
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            })
+            .then(() => {
+                showMessage('رجسٹریشن کامیاب! ہوم پیج پر لے جا رہے ہیں...', 'success');
+                setTimeout(() => window.location.href = 'patient-home.html', 1500);
+            })
+            .catch((error) => {
+                showMessage('غلطی: ' + error.message, 'error');
+            });
+        }
+
+        function goBackToPhone() {
+            document.getElementById('otpStep').style.display = 'none';
+            document.getElementById('phoneStep').style.display = 'block';
+        }
+
+        // reCAPTCHA
+        window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('sendOtpBtn', {
+            'size': 'invisible',
+            'callback': () => {}
+        });
+    </script>
+</body>
+</html>
