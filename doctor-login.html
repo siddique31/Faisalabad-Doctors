@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="ur" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ڈاکٹر لاگ ان - گوجرہ ڈاکٹرز</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="auth-page">
+    
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="auth-header">
+                <a href="index.html" class="back-btn">← واپس</a>
+                <div class="auth-logo">👨‍⚕️</div>
+                <h2>ڈاکٹر لاگ ان / رجسٹریشن</h2>
+                <p>گوجرہ ڈاکٹرز میں خوش آمدید</p>
+            </div>
+
+            <!-- Step 1: فون نمبر -->
+            <div id="phoneStep" class="auth-form">
+                <div class="input-group">
+                    <label>فون نمبر</label>
+                    <div class="phone-input">
+                        <span class="country-code">+92</span>
+                        <input type="tel" id="phoneNumber" placeholder="3XX-XXXXXXX" maxlength="10">
+                    </div>
+                </div>
+                <button onclick="sendOTP()" class="btn btn-primary btn-full" id="sendOtpBtn">
+                    OTP حاصل کریں
+                </button>
+            </div>
+
+            <!-- Step 2: OTP -->
+            <div id="otpStep" class="auth-form" style="display: none;">
+                <div class="input-group">
+                    <label>OTP کوڈ</label>
+                    <input type="text" id="otpCode" placeholder="------" maxlength="6" class="otp-input">
+                </div>
+                <button onclick="verifyOTP()" class="btn btn-primary btn-full">تصدیق کریں</button>
+            </div>
+
+            <!-- Step 3: ڈاکٹر رجسٹریشن -->
+            <div id="registerStep" class="auth-form" style="display: none;">
+                <h3 style="text-align: center; margin-bottom: 20px;">ڈاکٹر کی معلومات</h3>
+                
+                <div class="input-group">
+                    <label>پورا نام *</label>
+                    <input type="text" id="fullName" placeholder="ڈاکٹر کا نام">
+                </div>
+                
+                <div class="input-group">
+                    <label>سپیشلٹی *</label>
+                    <select id="specialty">
+                        <option value="">منتخب کریں</option>
+                        <option value="دل">دل کے امراض</option>
+                        <option value="جلد">جلد کے امراض</option>
+                        <option value="بچے">بچوں کے امراض</option>
+                        <option value="خواتین">خواتین کے امراض</option>
+                        <option value="ہڈی">ہڈیوں کے امراض</option>
+                        <option value="آنکھ">آنکھوں کے امراض</option>
+                        <option value="جنرل">جنرل فزیشن</option>
+                        <option value="دماغ">دماغی امراض</option>
+                        <option value="دانت">دانتوں کے امراض</option>
+                    </select>
+                </div>
+                
+                <div class="input-group">
+                    <label>تعلیم / قابلیت *</label>
+                    <input type="text" id="qualification" placeholder="مثلاً: MBBS, FCPS">
+                </div>
+                
+                <div class="input-group">
+                    <label>PMDC رجسٹریشن نمبر *</label>
+                    <input type="text" id="pmdcNumber" placeholder="PMDC-XXXXX">
+                </div>
+                
+                <div class="input-group">
+                    <label>تجربہ (سالوں میں)</label>
+                    <input type="number" id="experience" placeholder="مثلاً: 10" min="0">
+                </div>
+                
+                <div class="input-group">
+                    <label>CNIC نمبر *</label>
+                    <input type="text" id="cnic" placeholder="XXXXX-XXXXXXX-X">
+                </div>
+                
+                <div class="input-group">
+                    <label>مشاورت فیس (روپے میں) *</label>
+                    <input type="number" id="fee" placeholder="مثلاً: 500" min="100">
+                </div>
+                
+                <div class="input-group">
+                    <label>پروفائل تصویر URL</label>
+                    <input type="url" id="photoURL" placeholder="https://example.com/photo.jpg">
+                </div>
+                
+                <button onclick="completeDoctorRegistration()" class="btn btn-primary btn-full">
+                    رجسٹریشن جمع کروائیں
+                </button>
+                <p style="text-align: center; margin-top: 10px; font-size: 12px; color: #666;">
+                    * ایڈمن آپ کی معلومات کی تصدیق کے بعد آپ کا اکاؤنٹ ایکٹیو ہوگا
+                </p>
+            </div>
+
+            <div id="messageBox" class="message-box" style="display: none;"></div>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+    <script src="js/firebase-config.js"></script>
+    <script>
+        let currentVerificationId = '';
+        let currentPhoneNumber = '';
+
+        function showMessage(msg, type = 'info') {
+            const box = document.getElementById('messageBox');
+            box.style.display = 'block';
+            box.textContent = msg;
+            box.className = 'message-box ' + type;
+            setTimeout(() => box.style.display = 'none', 5000);
+        }
+
+        function sendOTP() {
+            const phone = document.getElementById('phoneNumber').value.trim();
+            if (phone.length < 10) {
+                showMessage('براہ کرم درست فون نمبر درج کریں', 'error');
+                return;
+            }
+            currentPhoneNumber = '+92' + phone;
+            
+            const btn = document.getElementById('sendOtpBtn');
+            btn.disabled = true;
+            btn.textContent = 'OTP بھیج رہے ہیں...';
+
+            firebase.auth().signInWithPhoneNumber(currentPhoneNumber, window.recaptchaVerifier)
+                .then((confirmationResult) => {
+                    currentVerificationId = confirmationResult.verificationId;
+                    document.getElementById('phoneStep').style.display = 'none';
+                    document.getElementById('otpStep').style.display = 'block';
+                    showMessage('OTP کامیابی سے بھیج دیا گیا!', 'success');
+                })
+                .catch((error) => {
+                    showMessage('غلطی: ' + error.message, 'error');
+                })
+                .finally(() => {
+                    btn.disabled = false;
+                    btn.textContent = 'OTP حاصل کریں';
+                });
+        }
+
+        function verifyOTP() {
+            const otp = document.getElementById('otpCode').value.trim();
+            if (otp.length !== 6) {
+                showMessage('براہ کرم 6 ہندسوں کا OTP درج کریں', 'error');
+                return;
+            }
+
+            const credential = firebase.auth.PhoneAuthProvider.credential(currentVerificationId, otp);
+            
+            firebase.auth().signInWithCredential(credential)
+                .then((result) => {
+                    const user = result.user;
+                    return db.collection('doctors').doc(user.uid).get();
+                })
+                .then((doc) => {
+                    if (doc.exists && doc.data().isApproved) {
+                        showMessage('لاگ ان کامیاب! ڈیش بورڈ پر لے جا رہے ہیں...', 'success');
+                        setTimeout(() => window.location.href = 'doctor-dashboard.html', 1000);
+                    } else if (doc.exists && !doc.data().isApproved) {
+                        showMessage('آپ کا اکاؤنٹ ابھی اپروو نہیں ہوا۔ براہ کرم انتظار کریں۔', 'warning');
+                    } else {
+                        document.getElementById('otpStep').style.display = 'none';
+                        document.getElementById('registerStep').style.display = 'block';
+                    }
+                })
+                .catch((error) => {
+                    showMessage('غلطی: ' + error.message, 'error');
+                });
+        }
+
+        function completeDoctorRegistration() {
+            const user = firebase.auth().currentUser;
+            if (!user) return;
+
+            const data = {
+                name: document.getElementById('fullName').value.trim(),
+                specialty: document.getElementById('specialty').value,
+                qualification: document.getElementById('qualification').value.trim(),
+                pmdcNumber: document.getElementById('pmdcNumber').value.trim(),
+                experience: document.getElementById('experience').value,
+                cnic: document.getElementById('cnic').value.trim(),
+                fee: parseInt(document.getElementById('fee').value),
+                photoURL: document.getElementById('photoURL').value.trim(),
+                phone: currentPhoneNumber,
+                isApproved: false,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            };
+
+            // خالی فیلڈز چیک کریں
+            if (!data.name || !data.specialty || !data.qualification || !data.pmdcNumber || !data.cnic || !data.fee) {
+                showMessage('براہ کرم تمام ضروری فیلڈز پُر کریں', 'error');
+                return;
+            }
+
+            db.collection('doctors').doc(user.uid).set(data)
+                .then(() => {
+                    showMessage('رجسٹریشن کامیاب! ایڈمن آپ کی معلومات کی تصدیق کرے گا۔', 'success');
+                    setTimeout(() => window.location.href = 'doctor-dashboard.html', 2000);
+                })
+                .catch((error) => {
+                    showMessage('غلطی: ' + error.message, 'error');
+                });
+        }
+
+        window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('sendOtpBtn', {
+            'size': 'invisible',
+            'callback': () => {}
+        });
+    </script>
+</body>
+</html>
