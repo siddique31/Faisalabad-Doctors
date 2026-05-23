@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="ur" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مریض ڈیش بورڈ - گوجرہ ڈاکٹرز</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    
+    <header class="header">
+        <nav class="navbar">
+            <div class="logo">
+                <span class="logo-icon">⚕️</span>
+                <span class="logo-text">گوجرہ ڈاکٹرز</span>
+            </div>
+            <div class="nav-links">
+                <span id="userNameDisplay">خوش آمدید!</span>
+                <button onclick="logout()" class="btn btn-outline">لاگ آؤٹ</button>
+            </div>
+        </nav>
+    </header>
+
+    <main class="dashboard">
+        <div class="dashboard-sidebar">
+            <div class="sidebar-menu">
+                <a href="#" class="sidebar-link active" onclick="showSection('doctors')">🔍 ڈاکٹرز تلاش کریں</a>
+                <a href="#" class="sidebar-link" onclick="showSection('appointments')">📅 میری اپوائنٹمنٹس</a>
+                <a href="#" class="sidebar-link" onclick="showSection('history')">📋 میری ہسٹری</a>
+                <a href="#" class="sidebar-link" onclick="showSection('profile')">👤 میرا پروفائل</a>
+            </div>
+        </div>
+
+        <div class="dashboard-content">
+            
+            <!-- ڈاکٹرز کی فہرست -->
+            <div id="doctorsSection" class="dashboard-section">
+                <h2>ڈاکٹرز کی فہرست</h2>
+                
+                <div class="filter-bar">
+                    <select id="specialtyFilter" onchange="filterDoctors()">
+                        <option value="">تمام سپیشلٹیز</option>
+                        <option value="دل">دل کے امراض</option>
+                        <option value="جلد">جلد کے امراض</option>
+                        <option value="بچے">بچوں کے امراض</option>
+                        <option value="خواتین">خواتین کے امراض</option>
+                        <option value="ہڈی">ہڈیوں کے امراض</option>
+                        <option value="آنکھ">آنکھوں کے امراض</option>
+                        <option value="جنرل">جنرل فزیشن</option>
+                    </select>
+                    <input type="text" id="doctorSearch" placeholder="ڈاکٹر کا نام تلاش کریں..." onkeyup="filterDoctors()">
+                </div>
+
+                <div class="doctors-grid" id="doctorsGrid">
+                    <p>ڈاکٹرز لوڈ ہو رہے ہیں...</p>
+                </div>
+            </div>
+
+            <!-- اپوائنٹمنٹس -->
+            <div id="appointmentsSection" class="dashboard-section" style="display: none;">
+                <h2>میری اپوائنٹمنٹس</h2>
+                <div id="appointmentsList">
+                    <p>کوئی اپوائنٹمنٹ نہیں</p>
+                </div>
+            </div>
+
+            <!-- ہسٹری -->
+            <div id="historySection" class="dashboard-section" style="display: none;">
+                <h2>میری مشاورت کی ہسٹری</h2>
+                <div id="historyList">
+                    <p>کوئی ریکارڈ نہیں</p>
+                </div>
+            </div>
+
+            <!-- پروفائل -->
+            <div id="profileSection" class="dashboard-section" style="display: none;">
+                <h2>میرا پروفائل</h2>
+                <div id="profileInfo">
+                    <p>پروفائل لوڈ ہو رہا ہے...</p>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+    <script src="js/firebase-config.js"></script>
+    <script>
+        let allDoctors = [];
+
+        // چیک کریں کہ یوزر لاگ ان ہے
+        firebase.auth().onAuthStateChanged((user) => {
+            if (!user) {
+                window.location.href = 'patient-login.html';
+                return;
+            }
+            loadUserData(user);
+            loadDoctors();
+        });
+
+        function loadUserData(user) {
+            db.collection('patients').doc(user.uid).get()
+                .then((doc) => {
+                    if (doc.exists) {
+                        document.getElementById('userNameDisplay').textContent = 'خوش آمدید، ' + doc.data().name;
+                    }
+                });
+        }
+
+        function loadDoctors() {
+            db.collection('doctors')
+                .where('isApproved', '==', true)
+                .get()
+                .then((snapshot) => {
+                    allDoctors = [];
+                    snapshot.forEach(doc => {
+                        allDoctors.push({ id: doc.id, ...doc.data() });
+                    });
+                    displayDoctors(allDoctors);
+                })
+                .catch((error) => {
+                    document.getElementById('doctorsGrid').innerHTML = '<p>ڈاکٹرز لوڈ کرنے میں مسئلہ</p>';
+                });
+        }
+
+        function displayDoctors(doctors) {
+            const grid = document.getElementById('doctorsGrid');
+            
+            if (doctors.length === 0) {
+                grid.innerHTML = '<p>کوئی ڈاکٹر نہیں ملا</p>';
+                return;
+            }
+
+            grid.innerHTML = doctors.map(doc => `
+                <div class="doctor-card">
+                    <img src="${doc.photoURL || 'https://via.placeholder.com/150'}" alt="${doc.name}" class="doctor-photo">
+                    <h3>${doc.name}</h3>
+                    <p class="specialty">${doc.specialty}</p>
+                    <p class="qualification">${doc.qualification || ''}</p>
+                    <p class="fee">فیس: Rs. ${doc.fee}</p>
+                    <p class="experience">تجربہ: ${doc.experience || 'N/A'} سال</p>
+                    <button onclick="bookAppointment('${doc.id}', '${doc.name}', ${doc.fee})" class="btn btn-primary btn-full">
+                        اپوائنٹمنٹ بک کریں
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function filterDoctors() {
+            const specialty = document.getElementById('specialtyFilter').value;
+            const search = document.getElementById('doctorSearch').value.toLowerCase();
+
+            let filtered = allDoctors;
+
+            if (specialty) {
+                filtered = filtered.filter(d => d.specialty === specialty);
+            }
+
+            if (search) {
+                filtered = filtered.filter(d => d.name.toLowerCase().includes(search));
+            }
+
+            displayDoctors(filtered);
+        }
+
+        function bookAppointment(doctorId, doctorName, fee) {
+            const date = prompt('تاریخ درج کریں (YYYY-MM-DD):');
+            if (!date) return;
+            
+            const time = prompt('وقت درج کریں (جیسے: 10:00 AM):');
+            if (!time) return;
+
+            const user = firebase.auth().currentUser;
+            if (!user) return;
+
+            db.collection('appointments').add({
+                patientId: user.uid,
+                doctorId: doctorId,
+                doctorName: doctorName,
+                fee: fee,
+                date: date,
+                time: time,
+                status: 'pending',
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            })
+            .then(() => {
+                alert('اپوائنٹمنٹ کامیابی سے بک ہو گئی!');
+                showSection('appointments');
+                loadAppointments();
+            })
+            .catch((error) => {
+                alert('غلطی: ' + error.message);
+            });
+        }
+
+        function loadAppointments() {
+            const user = firebase.auth().currentUser;
+            if (!user) return;
+
+            db.collection('appointments')
+                .where('patientId', '==', user.uid)
+                .orderBy('createdAt', 'desc')
+                .get()
+                .then((snapshot) => {
+                    const list = document.getElementById('appointmentsList');
+                    
+                    if (snapshot.empty) {
+                        list.innerHTML = '<p>کوئی اپوائنٹمنٹ نہیں</p>';
+                        return;
+                    }
+
+                    list.innerHTML = snapshot.docs.map(doc => {
+                        const data = doc.data();
+                        return `
+                            <div class="appointment-card">
+                                <h4>ڈاکٹر: ${data.doctorName}</h4>
+                                <p>تاریخ: ${data.date} - وقت: ${data.time}</p>
+                                <p>فیس: Rs. ${data.fee}</p>
+                                <p class="status status-${data.status}">اسٹیٹس: ${data.status}</p>
+                                ${data.status === 'confirmed' ? 
+                                    `<a href="video-call.html?id=${doc.id}" class="btn btn-primary">ویڈیو کال شروع کریں</a>` : ''}
+                            </div>
+                        `;
+                    }).join('');
+                });
+        }
+
+        function showSection(section) {
+            document.querySelectorAll('.dashboard-section').forEach(s => s.style.display = 'none');
+            document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+
+            document.getElementById(section + 'Section').style.display = 'block';
+            event.target.classList.add('active');
+
+            if (section === 'appointments') loadAppointments();
+            if (section === 'profile') loadProfile();
+        }
+
+        function loadProfile() {
+            const user = firebase.auth().currentUser;
+            if (!user) return;
+
+            db.collection('patients').doc(user.uid).get()
+                .then((doc) => {
+                    if (doc.exists) {
+                        const data = doc.data();
+                        document.getElementById('profileInfo').innerHTML = `
+                            <p><strong>نام:</strong> ${data.name}</p>
+                            <p><strong>فون:</strong> ${data.phone}</p>
+                            <p><strong>عمر:</strong> ${data.age}</p>
+                            <p><strong>جنس:</strong> ${data.gender === 'male' ? 'مرد' : data.gender === 'female' ? 'خاتون' : 'دیگر'}</p>
+                        `;
+                    }
+                });
+        }
+
+        function logout() {
+            firebase.auth().signOut().then(() => {
+                window.location.href = 'patient-login.html';
+            });
+        }
+    </script>
+</body>
+</html>
