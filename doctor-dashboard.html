@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctor Dashboard - Gojra Doctors</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    
+    <header class="header">
+        <nav class="navbar">
+            <div class="logo">
+                <span class="logo-icon">👨‍⚕️</span>
+                <span class="logo-text">Gojra Doctors</span>
+            </div>
+            <div class="nav-links">
+                <span id="doctorNameDisplay">Welcome!</span>
+                <button onclick="logout()" class="btn btn-outline">Logout</button>
+            </div>
+        </nav>
+    </header>
+
+    <main class="dashboard">
+        <div class="dashboard-sidebar">
+            <div class="sidebar-menu">
+                <a href="#" class="sidebar-link active" onclick="showSection('appointments')">📅 Appointments</a>
+                <a href="#" class="sidebar-link" onclick="showSection('schedule')">⏰ Schedule</a>
+                <a href="#" class="sidebar-link" onclick="showSection('earnings')">💰 Earnings</a>
+                <a href="#" class="sidebar-link" onclick="showSection('profile')">👤 Profile</a>
+            </div>
+        </div>
+
+        <div class="dashboard-content">
+            
+            <!-- Appointments -->
+            <div id="appointmentsSection" class="dashboard-section">
+                <h2>Today's Appointments</h2>
+                <div id="appointmentsList">
+                    <p>Loading...</p>
+                </div>
+            </div>
+
+            <!-- Schedule -->
+            <div id="scheduleSection" class="dashboard-section" style="display: none;">
+                <h2>Set Your Schedule</h2>
+                <div class="schedule-form">
+                    <div class="input-group">
+                        <label>Day</label>
+                        <select id="day">
+                            <option value="Monday">Monday</option>
+                            <option value="Tuesday">Tuesday</option>
+                            <option value="Wednesday">Wednesday</option>
+                            <option value="Thursday">Thursday</option>
+                            <option value="Friday">Friday</option>
+                            <option value="Saturday">Saturday</option>
+                            <option value="Sunday">Sunday</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label>Start Time</label>
+                        <input type="time" id="startTime">
+                    </div>
+                    <div class="input-group">
+                        <label>End Time</label>
+                        <input type="time" id="endTime">
+                    </div>
+                    <button onclick="addSchedule()" class="btn btn-primary">Add Schedule</button>
+                </div>
+                <div id="scheduleList" style="margin-top: 20px;"></div>
+            </div>
+
+            <!-- Earnings -->
+            <div id="earningsSection" class="dashboard-section" style="display: none;">
+                <h2>My Earnings</h2>
+                <div id="earningsInfo">
+                    <p>Loading...</p>
+                </div>
+            </div>
+
+            <!-- Profile -->
+            <div id="profileSection" class="dashboard-section" style="display: none;">
+                <h2>My Profile</h2>
+                <div id="profileInfo">
+                    <p>Loading...</p>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+    <script src="js/firebase-config.js"></script>
+    <script>
+        let currentDoctorId = '';
+
+        firebase.auth().onAuthStateChanged((user) => {
+            if (!user) {
+                window.location.href = 'doctor-login.html';
+                return;
+            }
+            currentDoctorId = user.uid;
+            loadDoctorData(user);
+            loadAppointments();
+        });
+
+        function loadDoctorData(user) {
+            db.collection('doctors').doc(user.uid).get()
+                .then((doc) => {
+                    if (doc.exists) {
+                        document.getElementById('doctorNameDisplay').textContent = 
+                            'Dr. ' + doc.data().name;
+                    }
+                });
+        }
+
+        function loadAppointments() {
+            db.collection('appointments')
+                .where('doctorId', '==', currentDoctorId)
+                .orderBy('createdAt', 'desc')
+                .get()
+                .then((snapshot) => {
+                    const list = document.getElementById('appointmentsList');
+                    
+                    if (snapshot.empty) {
+                        list.innerHTML = '<p>No appointments found</p>';
+                        return;
+                    }
+
+                    list.innerHTML = snapshot.docs.map(doc => {
+                        const data = doc.data();
+                        return `
+                            <div class="appointment-card">
+                                <h4>Patient: ${data.patientName || 'Unknown'}</h4>
+                                <p>Date: ${data.date} - Time: ${data.time}</p>
+                                <p>Fee: Rs. ${data.fee}</p>
+                                <p class="status status-${data.status}">Status: ${data.status}</p>
+                                ${data.status === 'confirmed' ? 
+                                    `<a href="video-call.html?id=${doc.id}" class="btn btn-primary">Start Video Call</a>` : ''}
+                            </div>
+                        `;
+                    }).join('');
+                });
+        }
+
+        function addSchedule() {
+            const day = document.getElementById('day').value;
+            const startTime = document.getElementById('startTime').value;
+            const endTime = document.getElementById('endTime').value;
+
+            if (!startTime || !endTime) {
+                alert('Please select time');
+                return;
+            }
+
+            db.collection('doctors').doc(currentDoctorId).collection('schedule').add({
+                day: day,
+                startTime: startTime,
+                endTime: endTime
+            })
+            .then(() => {
+                alert('Schedule added successfully!');
+                loadSchedule();
+            })
+            .catch((error) => {
+                alert('Error: ' + error.message);
+            });
+        }
+
+        function loadSchedule() {
+            db.collection('doctors').doc(currentDoctorId).collection('schedule').get()
+                .then((snapshot) => {
+                    const list = document.getElementById('scheduleList');
+                    if (snapshot.empty) {
+                        list.innerHTML = '<p>No schedule set</p>';
+                        return;
+                    }
+                    list.innerHTML = '<h3>My Schedule:</h3>' + snapshot.docs.map(doc => {
+                        const data = doc.data();
+                        return `<p>${data.day}: ${data.startTime} - ${data.endTime}</p>`;
+                    }).join('');
+                });
+        }
+
+        function showSection(section) {
+            document.querySelectorAll('.dashboard-section').forEach(s => s.style.display = 'none');
+            document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+            document.getElementById(section + 'Section').style.display = 'block';
+            event.target.classList.add('active');
+
+            if (section === 'schedule') loadSchedule();
+            if (section === 'earnings') loadEarnings();
+            if (section === 'profile') loadProfile();
+        }
+
+        function loadEarnings() {
+            document.getElementById('earningsInfo').innerHTML = `
+                <div class="earnings-card">
+                    <h3>Total Earnings</h3>
+                    <p class="earnings-amount" id="totalEarnings">Rs. 0</p>
+                </div>
+            `;
+        }
+
+        function loadProfile() {
+            db.collection('doctors').doc(currentDoctorId).get()
+                .then((doc) => {
+                    if (doc.exists) {
+                        const data = doc.data();
+                        document.getElementById('profileInfo').innerHTML = `
+                            <p><strong>Name:</strong> ${data.name}</p>
+                            <p><strong>Specialty:</strong> ${data.specialty}</p>
+                            <p><strong>Qualification:</strong> ${data.qualification}</p>
+                            <p><strong>PMDC:</strong> ${data.pmdcNumber}</p>
+                            <p><strong>Fee:</strong> Rs. ${data.fee}</p>
+                            <p><strong>Status:</strong> ${data.isApproved ? '✅ Approved' : '⏳ Pending Approval'}</p>
+                        `;
+                    }
+                });
+        }
+
+        function logout() {
+            firebase.auth().signOut().then(() => {
+                window.location.href = 'doctor-login.html';
+            });
+        }
+
+        loadSchedule();
+    </script>
+</body>
+</html>
