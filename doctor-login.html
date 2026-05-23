@@ -17,38 +17,41 @@
                 <p>Welcome to Gojra Doctors</p>
             </div>
 
-            <!-- Step 1: Phone Number -->
-            <div id="phoneStep" class="auth-form">
+            <!-- Login Form -->
+            <div id="loginStep" class="auth-form">
                 <div class="input-group">
-                    <label>Phone Number</label>
-                    <div class="phone-input">
-                        <span class="country-code">+92</span>
-                        <input type="tel" id="phoneNumber" placeholder="3XX-XXXXXXX" maxlength="10">
-                    </div>
+                    <label>Email</label>
+                    <input type="email" id="loginEmail" placeholder="your@email.com">
                 </div>
-                <button onclick="sendOTP()" class="btn btn-primary btn-full" id="sendOtpBtn">
-                    Get OTP
+                <div class="input-group">
+                    <label>Password</label>
+                    <input type="password" id="loginPassword" placeholder="Password">
+                </div>
+                <button onclick="loginDoctor()" class="btn btn-primary btn-full" id="loginBtn">
+                    Login
                 </button>
+                <p style="text-align: center; margin-top: 15px;">
+                    New doctor? 
+                    <a href="#" onclick="showRegister()" style="color: var(--primary);">Register Here</a>
+                </p>
             </div>
 
-            <!-- Step 2: OTP -->
-            <div id="otpStep" class="auth-form" style="display: none;">
-                <div class="input-group">
-                    <label>OTP Code</label>
-                    <input type="text" id="otpCode" placeholder="------" maxlength="6" class="otp-input">
-                </div>
-                <button onclick="verifyOTP()" class="btn btn-primary btn-full">Verify</button>
-            </div>
-
-            <!-- Step 3: Doctor Registration -->
+            <!-- Register Form -->
             <div id="registerStep" class="auth-form" style="display: none;">
-                <h3 style="text-align: center; margin-bottom: 20px;">Doctor Information</h3>
+                <h3 style="text-align: center; margin-bottom: 20px;">Doctor Registration</h3>
                 
                 <div class="input-group">
                     <label>Full Name *</label>
-                    <input type="text" id="fullName" placeholder="Doctor's name">
+                    <input type="text" id="fullName" placeholder="Dr. Name">
                 </div>
-                
+                <div class="input-group">
+                    <label>Email *</label>
+                    <input type="email" id="regEmail" placeholder="your@email.com">
+                </div>
+                <div class="input-group">
+                    <label>Password *</label>
+                    <input type="password" id="regPassword" placeholder="Min 6 characters" minlength="6">
+                </div>
                 <div class="input-group">
                     <label>Specialty *</label>
                     <select id="specialty">
@@ -60,46 +63,41 @@
                         <option value="Orthopedics">Orthopedics</option>
                         <option value="Ophthalmology">Ophthalmology</option>
                         <option value="General">General Physician</option>
-                        <option value="Neurology">Neurology</option>
-                        <option value="Dentistry">Dentistry</option>
                     </select>
                 </div>
-                
                 <div class="input-group">
                     <label>Qualification *</label>
                     <input type="text" id="qualification" placeholder="e.g., MBBS, FCPS">
                 </div>
-                
                 <div class="input-group">
-                    <label>PMDC Registration Number *</label>
+                    <label>PMDC Number *</label>
                     <input type="text" id="pmdcNumber" placeholder="PMDC-XXXXX">
                 </div>
-                
                 <div class="input-group">
                     <label>Experience (Years)</label>
-                    <input type="number" id="experience" placeholder="e.g., 10" min="0">
+                    <input type="number" id="experience" placeholder="e.g., 10">
                 </div>
-                
                 <div class="input-group">
-                    <label>CNIC Number *</label>
+                    <label>CNIC *</label>
                     <input type="text" id="cnic" placeholder="XXXXX-XXXXXXX-X">
                 </div>
-                
                 <div class="input-group">
                     <label>Consultation Fee (Rs.) *</label>
                     <input type="number" id="fee" placeholder="e.g., 500" min="100">
                 </div>
-                
                 <div class="input-group">
-                    <label>Profile Photo URL</label>
-                    <input type="url" id="photoURL" placeholder="https://example.com/photo.jpg">
+                    <label>Phone Number</label>
+                    <input type="tel" id="phone" placeholder="03XX-XXXXXXX">
                 </div>
-                
-                <button onclick="completeDoctorRegistration()" class="btn btn-primary btn-full">
+                <button onclick="registerDoctor()" class="btn btn-primary btn-full">
                     Submit Registration
                 </button>
                 <p style="text-align: center; margin-top: 10px; font-size: 12px; color: #666;">
                     * Admin will verify your information before activation
+                </p>
+                <p style="text-align: center; margin-top: 10px;">
+                    Already registered? 
+                    <a href="#" onclick="showLogin()" style="color: var(--primary);">Login Here</a>
                 </p>
             </div>
 
@@ -112,9 +110,6 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
     <script src="js/firebase-config.js"></script>
     <script>
-        let currentVerificationId = '';
-        let currentPhoneNumber = '';
-
         function showMessage(msg, type = 'info') {
             const box = document.getElementById('messageBox');
             box.style.display = 'block';
@@ -123,101 +118,107 @@
             setTimeout(() => box.style.display = 'none', 5000);
         }
 
-        function sendOTP() {
-            const phone = document.getElementById('phoneNumber').value.trim();
-            if (phone.length < 10) {
-                showMessage('Please enter a valid phone number', 'error');
-                return;
-            }
-            currentPhoneNumber = '+92' + phone;
-            
-            const btn = document.getElementById('sendOtpBtn');
-            btn.disabled = true;
-            btn.textContent = 'Sending OTP...';
-
-            firebase.auth().signInWithPhoneNumber(currentPhoneNumber, window.recaptchaVerifier)
-                .then((confirmationResult) => {
-                    currentVerificationId = confirmationResult.verificationId;
-                    document.getElementById('phoneStep').style.display = 'none';
-                    document.getElementById('otpStep').style.display = 'block';
-                    showMessage('OTP sent successfully!', 'success');
-                })
-                .catch((error) => {
-                    showMessage('Error: ' + error.message, 'error');
-                })
-                .finally(() => {
-                    btn.disabled = false;
-                    btn.textContent = 'Get OTP';
-                });
+        function showRegister() {
+            document.getElementById('loginStep').style.display = 'none';
+            document.getElementById('registerStep').style.display = 'block';
         }
 
-        function verifyOTP() {
-            const otp = document.getElementById('otpCode').value.trim();
-            if (otp.length !== 6) {
-                showMessage('Please enter the 6-digit OTP', 'error');
+        function showLogin() {
+            document.getElementById('registerStep').style.display = 'none';
+            document.getElementById('loginStep').style.display = 'block';
+        }
+
+        function loginDoctor() {
+            const email = document.getElementById('loginEmail').value.trim();
+            const password = document.getElementById('loginPassword').value;
+
+            if (!email || !password) {
+                showMessage('Please enter email and password', 'error');
                 return;
             }
 
-            const credential = firebase.auth.PhoneAuthProvider.credential(currentVerificationId, otp);
-            
-            firebase.auth().signInWithCredential(credential)
+            const btn = document.getElementById('loginBtn');
+            btn.disabled = true;
+            btn.textContent = 'Logging in...';
+
+            firebase.auth().signInWithEmailAndPassword(email, password)
                 .then((result) => {
                     const user = result.user;
                     return db.collection('doctors').doc(user.uid).get();
                 })
                 .then((doc) => {
                     if (doc.exists && doc.data().isApproved) {
-                        showMessage('Login successful! Redirecting to dashboard...', 'success');
+                        showMessage('Login successful!', 'success');
                         setTimeout(() => window.location.href = 'doctor-dashboard.html', 1000);
                     } else if (doc.exists && !doc.data().isApproved) {
-                        showMessage('Your account is pending approval. Please wait.', 'warning');
+                        showMessage('Your account is pending approval.', 'warning');
                     } else {
-                        document.getElementById('otpStep').style.display = 'none';
-                        document.getElementById('registerStep').style.display = 'block';
+                        showMessage('Doctor profile not found. Please register.', 'error');
+                        firebase.auth().signOut();
                     }
                 })
                 .catch((error) => {
-                    showMessage('Error: ' + error.message, 'error');
+                    let msg = 'Login failed!';
+                    if (error.code === 'auth/user-not-found') msg = 'No account found. Please register.';
+                    else if (error.code === 'auth/wrong-password') msg = 'Incorrect password!';
+                    showMessage(msg, 'error');
+                })
+                .finally(() => {
+                    btn.disabled = false;
+                    btn.textContent = 'Login';
                 });
         }
 
-        function completeDoctorRegistration() {
-            const user = firebase.auth().currentUser;
-            if (!user) return;
+        function registerDoctor() {
+            const name = document.getElementById('fullName').value.trim();
+            const email = document.getElementById('regEmail').value.trim();
+            const password = document.getElementById('regPassword').value;
+            const specialty = document.getElementById('specialty').value;
+            const qualification = document.getElementById('qualification').value.trim();
+            const pmdcNumber = document.getElementById('pmdcNumber').value.trim();
+            const experience = document.getElementById('experience').value;
+            const cnic = document.getElementById('cnic').value.trim();
+            const fee = document.getElementById('fee').value;
+            const phone = document.getElementById('phone').value.trim();
 
-            const data = {
-                name: document.getElementById('fullName').value.trim(),
-                specialty: document.getElementById('specialty').value,
-                qualification: document.getElementById('qualification').value.trim(),
-                pmdcNumber: document.getElementById('pmdcNumber').value.trim(),
-                experience: document.getElementById('experience').value,
-                cnic: document.getElementById('cnic').value.trim(),
-                fee: parseInt(document.getElementById('fee').value),
-                photoURL: document.getElementById('photoURL').value.trim(),
-                phone: currentPhoneNumber,
-                isApproved: false,
-                createdAt: firebase.firestore.FieldValue.serverTimestamp()
-            };
-
-            if (!data.name || !data.specialty || !data.qualification || !data.pmdcNumber || !data.cnic || !data.fee) {
+            if (!name || !email || !password || !specialty || !qualification || !pmdcNumber || !cnic || !fee) {
                 showMessage('Please fill in all required fields', 'error');
                 return;
             }
 
-            db.collection('doctors').doc(user.uid).set(data)
+            if (password.length < 6) {
+                showMessage('Password must be at least 6 characters', 'error');
+                return;
+            }
+
+            firebase.auth().createUserWithEmailAndPassword(email, password)
+                .then((result) => {
+                    const user = result.user;
+                    return db.collection('doctors').doc(user.uid).set({
+                        name: name,
+                        email: email,
+                        specialty: specialty,
+                        qualification: qualification,
+                        pmdcNumber: pmdcNumber,
+                        experience: experience,
+                        cnic: cnic,
+                        fee: parseInt(fee),
+                        phone: phone,
+                        photoURL: '',
+                        isApproved: false,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                })
                 .then(() => {
-                    showMessage('Registration successful! Admin will verify your information.', 'success');
+                    showMessage('Registration submitted! Waiting for admin approval.', 'success');
                     setTimeout(() => window.location.href = 'doctor-dashboard.html', 2000);
                 })
                 .catch((error) => {
-                    showMessage('Error: ' + error.message, 'error');
+                    let msg = 'Registration failed!';
+                    if (error.code === 'auth/email-already-in-use') msg = 'This email is already registered!';
+                    showMessage(msg, 'error');
                 });
         }
-
-        window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('sendOtpBtn', {
-            'size': 'invisible',
-            'callback': () => {}
-        });
     </script>
 </body>
 </html>
