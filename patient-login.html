@@ -14,44 +14,47 @@
                 <a href="index.html" class="back-btn">← Back</a>
                 <div class="auth-logo">⚕️</div>
                 <h2>Patient Login</h2>
-                <p>Enter your phone number</p>
+                <p>Login or Create Account</p>
             </div>
 
-            <!-- Step 1: Phone Number -->
-            <div id="phoneStep" class="auth-form">
+            <!-- Login Form -->
+            <div id="loginStep" class="auth-form">
                 <div class="input-group">
-                    <label>Phone Number</label>
-                    <div class="phone-input">
-                        <span class="country-code">+92</span>
-                        <input type="tel" id="phoneNumber" placeholder="3XX-XXXXXXX" maxlength="10">
-                    </div>
+                    <label>Email</label>
+                    <input type="email" id="loginEmail" placeholder="your@email.com">
                 </div>
-                <button onclick="sendOTP()" class="btn btn-primary btn-full" id="sendOtpBtn">
-                    Get OTP
-                </button>
-                <p class="auth-note">A new account will be created if not already registered</p>
-            </div>
-
-            <!-- Step 2: OTP -->
-            <div id="otpStep" class="auth-form" style="display: none;">
-                <p class="otp-sent-to">OTP sent to: <span id="sentTo"></span></p>
                 <div class="input-group">
-                    <label>OTP Code</label>
-                    <input type="text" id="otpCode" placeholder="------" maxlength="6" class="otp-input">
+                    <label>Password</label>
+                    <input type="password" id="loginPassword" placeholder="Password">
                 </div>
-                <button onclick="verifyOTP()" class="btn btn-primary btn-full" id="verifyOtpBtn">
-                    Verify
+                <button onclick="loginPatient()" class="btn btn-primary btn-full" id="loginBtn">
+                    Login
                 </button>
-                <button onclick="goBackToPhone()" class="btn btn-outline btn-full" style="margin-top: 10px;">
-                    Change Number
-                </button>
+                <p style="text-align: center; margin-top: 15px;">
+                    Don't have an account? 
+                    <a href="#" onclick="showRegister()" style="color: var(--primary);">Register Here</a>
+                </p>
             </div>
 
-            <!-- Step 3: Registration (New Patient) -->
+            <!-- Register Form -->
             <div id="registerStep" class="auth-form" style="display: none;">
+                <h3 style="text-align: center; margin-bottom: 20px;">Create Account</h3>
+                
                 <div class="input-group">
                     <label>Full Name</label>
                     <input type="text" id="fullName" placeholder="Enter your name">
+                </div>
+                <div class="input-group">
+                    <label>Email</label>
+                    <input type="email" id="regEmail" placeholder="your@email.com">
+                </div>
+                <div class="input-group">
+                    <label>Password</label>
+                    <input type="password" id="regPassword" placeholder="Min 6 characters" minlength="6">
+                </div>
+                <div class="input-group">
+                    <label>Confirm Password</label>
+                    <input type="password" id="confirmPassword" placeholder="Re-enter password" minlength="6">
                 </div>
                 <div class="input-group">
                     <label>Age</label>
@@ -66,25 +69,24 @@
                         <option value="other">Other</option>
                     </select>
                 </div>
-                <button onclick="completeRegistration()" class="btn btn-primary btn-full">
-                    Complete Registration
+                <button onclick="registerPatient()" class="btn btn-primary btn-full">
+                    Register
                 </button>
+                <p style="text-align: center; margin-top: 15px;">
+                    Already have an account? 
+                    <a href="#" onclick="showLogin()" style="color: var(--primary);">Login Here</a>
+                </p>
             </div>
 
             <div id="messageBox" class="message-box" style="display: none;"></div>
         </div>
     </div>
 
-    <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
-    
     <script src="js/firebase-config.js"></script>
     <script>
-        let currentVerificationId = '';
-        let currentPhoneNumber = '';
-
         function showMessage(msg, type = 'info') {
             const box = document.getElementById('messageBox');
             box.style.display = 'block';
@@ -93,118 +95,96 @@
             setTimeout(() => box.style.display = 'none', 5000);
         }
 
-        function sendOTP() {
-            const phone = document.getElementById('phoneNumber').value.trim();
-            
-            if (phone.length < 10) {
-                showMessage('Please enter a valid phone number', 'error');
-                return;
-            }
-
-            currentPhoneNumber = '+92' + phone;
-            document.getElementById('sentTo').textContent = currentPhoneNumber;
-            
-            const btn = document.getElementById('sendOtpBtn');
-            btn.disabled = true;
-            btn.textContent = 'Sending OTP...';
-
-            // Firebase send OTP
-            firebase.auth().signInWithPhoneNumber(currentPhoneNumber, window.recaptchaVerifier)
-                .then((confirmationResult) => {
-                    currentVerificationId = confirmationResult.verificationId;
-                    document.getElementById('phoneStep').style.display = 'none';
-                    document.getElementById('otpStep').style.display = 'block';
-                    showMessage('OTP sent successfully!', 'success');
-                })
-                .catch((error) => {
-                    showMessage('Error: ' + error.message, 'error');
-                })
-                .finally(() => {
-                    btn.disabled = false;
-                    btn.textContent = 'Get OTP';
-                });
+        function showRegister() {
+            document.getElementById('loginStep').style.display = 'none';
+            document.getElementById('registerStep').style.display = 'block';
         }
 
-        function verifyOTP() {
-            const otp = document.getElementById('otpCode').value.trim();
-            
-            if (otp.length !== 6) {
-                showMessage('Please enter the 6-digit OTP', 'error');
+        function showLogin() {
+            document.getElementById('registerStep').style.display = 'none';
+            document.getElementById('loginStep').style.display = 'block';
+        }
+
+        // Patient Login
+        function loginPatient() {
+            const email = document.getElementById('loginEmail').value.trim();
+            const password = document.getElementById('loginPassword').value;
+
+            if (!email || !password) {
+                showMessage('Please enter email and password', 'error');
                 return;
             }
 
-            const btn = document.getElementById('verifyOtpBtn');
+            const btn = document.getElementById('loginBtn');
             btn.disabled = true;
-            btn.textContent = 'Verifying...';
+            btn.textContent = 'Logging in...';
 
-            const credential = firebase.auth.PhoneAuthProvider.credential(currentVerificationId, otp);
-            
-            firebase.auth().signInWithCredential(credential)
+            firebase.auth().signInWithEmailAndPassword(email, password)
                 .then((result) => {
-                    const user = result.user;
-                    // Check if user exists
-                    return db.collection('patients').doc(user.uid).get();
-                })
-                .then((doc) => {
-                    if (doc.exists) {
-                        // Existing user - go to home
-                        showMessage('Login successful!', 'success');
-                        setTimeout(() => window.location.href = 'patient-home.html', 1000);
-                    } else {
-                        // New user - show registration
-                        document.getElementById('otpStep').style.display = 'none';
-                        document.getElementById('registerStep').style.display = 'block';
-                    }
+                    showMessage('Login successful!', 'success');
+                    setTimeout(() => window.location.href = 'patient-home.html', 1000);
                 })
                 .catch((error) => {
-                    showMessage('Invalid OTP: ' + error.message, 'error');
+                    let msg = 'Login failed!';
+                    if (error.code === 'auth/user-not-found') msg = 'No account found with this email. Please register.';
+                    else if (error.code === 'auth/wrong-password') msg = 'Incorrect password!';
+                    else if (error.code === 'auth/invalid-email') msg = 'Invalid email address!';
+                    showMessage(msg, 'error');
                 })
                 .finally(() => {
                     btn.disabled = false;
-                    btn.textContent = 'Verify';
+                    btn.textContent = 'Login';
                 });
         }
 
-        function completeRegistration() {
-            const user = firebase.auth().currentUser;
-            if (!user) return;
-
+        // Patient Registration
+        function registerPatient() {
             const name = document.getElementById('fullName').value.trim();
+            const email = document.getElementById('regEmail').value.trim();
+            const password = document.getElementById('regPassword').value;
+            const confirm = document.getElementById('confirmPassword').value;
             const age = document.getElementById('age').value;
             const gender = document.getElementById('gender').value;
 
-            if (!name || !age || !gender) {
+            if (!name || !email || !password || !confirm || !age || !gender) {
                 showMessage('Please fill in all fields', 'error');
                 return;
             }
 
-            db.collection('patients').doc(user.uid).set({
-                name: name,
-                phone: currentPhoneNumber,
-                age: parseInt(age),
-                gender: gender,
-                email: user.email || '',
-                createdAt: firebase.firestore.FieldValue.serverTimestamp()
-            })
-            .then(() => {
-                showMessage('Registration successful! Redirecting to home...', 'success');
-                setTimeout(() => window.location.href = 'patient-home.html', 1500);
-            })
-            .catch((error) => {
-                showMessage('Error: ' + error.message, 'error');
-            });
-        }
+            if (password !== confirm) {
+                showMessage('Passwords do not match!', 'error');
+                return;
+            }
 
-        function goBackToPhone() {
-            document.getElementById('otpStep').style.display = 'none';
-            document.getElementById('phoneStep').style.display = 'block';
-        }
+            if (password.length < 6) {
+                showMessage('Password must be at least 6 characters', 'error');
+                return;
+            }
 
-        // reCAPTCHA
-        window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('sendOtpBtn', {
-            'size': 'invisible',
-            'callback': () => {}
-        });
+            firebase.auth().createUserWithEmailAndPassword(email, password)
+                .then((result) => {
+                    const user = result.user;
+                    // Save patient data
+                    return db.collection('patients').doc(user.uid).set({
+                        name: name,
+                        email: email,
+                        age: parseInt(age),
+                        gender: gender,
+                        phone: '',
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                })
+                .then(() => {
+                    showMessage('Registration successful! Redirecting...', 'success');
+                    setTimeout(() => window.location.href = 'patient-home.html', 1500);
+                })
+                .catch((error) => {
+                    let msg = 'Registration failed!';
+                    if (error.code === 'auth/email-already-in-use') msg = 'This email is already registered. Please login.';
+                    else if (error.code === 'auth/weak-password') msg = 'Password is too weak!';
+                    showMessage(msg, 'error');
+                });
+        }
     </script>
 </body>
 </html>
