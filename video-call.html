@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Video Call - Gojra Doctors</title>
-    <link rel="stylesheet" href="css/style.css">
     <style>
         :root {
             --primary: #0d9488;
@@ -13,34 +12,28 @@
             --info: #3b82f6;
             --white: #ffffff;
         }
-
         * { margin: 0; padding: 0; box-sizing: border-box; }
-
         body {
             font-family: 'Poppins', sans-serif;
             background: #1a1a2e;
             height: 100vh;
             overflow: hidden;
         }
-
         .call-container {
             display: flex;
             flex-direction: column;
             height: 100vh;
         }
-
         .video-area {
             flex: 1;
             position: relative;
             background: #0f0f23;
         }
-
         #remote-video {
             width: 100%;
             height: 100%;
             object-fit: cover;
         }
-
         #local-video {
             position: absolute;
             bottom: 100px;
@@ -53,7 +46,6 @@
             object-fit: cover;
             background: #2a2a3e;
         }
-
         .call-info {
             position: absolute;
             top: 20px;
@@ -61,7 +53,6 @@
             color: var(--white);
             z-index: 5;
         }
-
         .call-timer {
             position: absolute;
             top: 20px;
@@ -71,7 +62,6 @@
             font-size: 18px;
             z-index: 5;
         }
-
         .call-controls {
             display: flex;
             gap: 20px;
@@ -81,7 +71,6 @@
             background: rgba(0,0,0,0.5);
             backdrop-filter: blur(10px);
         }
-
         .control-btn {
             width: 50px;
             height: 50px;
@@ -92,44 +81,27 @@
             transition: all 0.3s;
             color: white;
         }
-
         .control-btn:hover { transform: scale(1.1); }
-
         .control-btn.end-call {
             background: var(--danger);
             width: 60px;
             height: 60px;
             font-size: 26px;
         }
-
         .control-btn.mute { background: #374151; }
         .control-btn.mute.active { background: var(--warning); }
         .control-btn.video-toggle { background: #374151; }
         .control-btn.video-toggle.active { background: var(--warning); }
         .control-btn.switch-camera { background: var(--info); }
-
         .control-group {
             display: flex;
             flex-direction: column;
             align-items: center;
             gap: 5px;
         }
-
         .control-label {
             color: white;
             font-size: 10px;
-        }
-
-        .user-count {
-            position: absolute;
-            bottom: 100px;
-            left: 20px;
-            background: rgba(0,0,0,0.6);
-            color: white;
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            z-index: 5;
         }
     </style>
 </head>
@@ -137,43 +109,30 @@
     
     <div class="call-container">
         <div class="video-area">
-            
-            <!-- Remote Video (Doctor/Patient) -->
             <video id="remote-video" autoplay playsinline></video>
-            
-            <!-- Local Video (You) -->
             <video id="local-video" autoplay playsinline muted></video>
             
-            <!-- Call Info -->
             <div class="call-info">
                 <h3 id="callDoctorName">Consultation Room</h3>
                 <p id="callStatus" style="font-size: 12px; opacity: 0.7;">Connecting...</p>
             </div>
             
-            <!-- Timer -->
             <div class="call-timer" id="callTimer">00:00</div>
-            
-            <!-- User Count -->
-            <div class="user-count" id="userCount">👤 1</div>
         </div>
         
-        <!-- Controls -->
         <div class="call-controls">
             <div class="control-group">
                 <button class="control-btn mute" id="muteBtn" onclick="toggleMute()">🎤</button>
                 <span class="control-label">Mute</span>
             </div>
-            
             <div class="control-group">
                 <button class="control-btn video-toggle" id="videoBtn" onclick="toggleVideo()">📹</button>
                 <span class="control-label">Video</span>
             </div>
-            
             <div class="control-group">
                 <button class="control-btn end-call" onclick="endCall()">📞</button>
                 <span class="control-label">End</span>
             </div>
-            
             <div class="control-group">
                 <button class="control-btn switch-camera" onclick="switchCamera()">🔄</button>
                 <span class="control-label">Flip</span>
@@ -181,39 +140,28 @@
         </div>
     </div>
 
-    <!-- Agora SDK -->
     <script src="https://download.agora.io/sdk/release/AgoraRTC_N-4.20.0.js"></script>
-    
-    <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
     <script src="js/firebase-config.js"></script>
     
     <script>
-        // ==========================================
-        // AGORA VIDEO CALL - Gojra Doctors
-        // ==========================================
-        
-        // Agora Configuration
-        const APP_ID = '7557cd8eb3c845bcaf07ae8eb251fe0a';
-        const TOKEN = null; // Leave null for testing, add token for production
+        // Agora Configuration - Testing Mode (No Token Needed)
+        const APP_ID = 'b808df55edd24f23ac506f9dd7e67b18';
+        const TOKEN = null;
         
         let client = null;
         let localAudioTrack = null;
         let localVideoTrack = null;
-        let remoteUsers = {};
         let isMuted = false;
         let isVideoOff = false;
         let facingMode = 'user';
         let callStartTime = null;
         let timerInterval = null;
         
-        // Get appointment ID from URL
         const params = new URLSearchParams(window.location.search);
         const appointmentId = params.get('id');
         const channelName = 'Gojra-' + (appointmentId || Date.now());
-        
-        // ==================== INITIALIZATION ====================
         
         async function initCall() {
             if (!appointmentId) {
@@ -221,236 +169,132 @@
                 return;
             }
             
-            // Get appointment info
             try {
                 const doc = await db.collection('appointments').doc(appointmentId).get();
                 if (doc.exists) {
-                    const data = doc.data();
-                    document.getElementById('callDoctorName').textContent = 'Dr. ' + (data.doctorName || 'Doctor');
+                    document.getElementById('callDoctorName').textContent = 'Dr. ' + (doc.data().doctorName || 'Doctor');
                 }
-            } catch(e) {
-                console.error('Error:', e);
-            }
+            } catch(e) {}
             
-            // Create Agora client
             client = AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' });
             
-            // Handle remote users
-            client.on('user-published', handleUserPublished);
-            client.on('user-unpublished', handleUserUnpublished);
-            client.on('user-joined', handleUserJoined);
-            client.on('user-left', handleUserLeft);
-            
-            // Join channel
-            try {
-                const uid = await client.join(APP_ID, channelName, TOKEN, null);
-                console.log('Joined channel with UID:', uid);
+            client.on('user-published', async (user, mediaType) => {
+                await client.subscribe(user, mediaType);
+                if (mediaType === 'video') {
+                    user.videoTrack.play('remote-video');
+                }
+                if (mediaType === 'audio') {
+                    user.audioTrack.play();
+                }
                 document.getElementById('callStatus').textContent = 'Connected ✅';
+            });
+            
+            client.on('user-unpublished', () => {
+                document.getElementById('callStatus').textContent = 'Other person left';
+            });
+            
+            try {
+                await client.join(APP_ID, channelName, TOKEN, null);
+                document.getElementById('callStatus').textContent = 'Waiting for other person...';
                 
-                // Create local tracks
                 localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack();
                 localVideoTrack = await AgoraRTC.createCameraVideoTrack({
                     facingMode: facingMode,
                     encoderConfig: '720p'
                 });
                 
-                // Play local video
                 localVideoTrack.play('local-video');
-                
-                // Publish tracks
                 await client.publish([localAudioTrack, localVideoTrack]);
-                
-                // Start timer
                 startTimer();
                 
             } catch(error) {
-                console.error('Join error:', error);
-                document.getElementById('callStatus').textContent = 'Connection failed: ' + error.message;
+                console.error('Error:', error);
+                document.getElementById('callStatus').textContent = 'Error: ' + error.message;
             }
         }
-        
-        // ==================== REMOTE USERS ====================
-        
-        async function handleUserPublished(user, mediaType) {
-            console.log('User published:', user.uid, mediaType);
-            
-            await client.subscribe(user, mediaType);
-            
-            if (mediaType === 'video') {
-                const remoteVideoTrack = user.videoTrack;
-                remoteVideoTrack.play('remote-video');
-                remoteUsers[user.uid] = user;
-                updateUserCount();
-            }
-            
-            if (mediaType === 'audio') {
-                const remoteAudioTrack = user.audioTrack;
-                remoteAudioTrack.play();
-            }
-        }
-        
-        function handleUserUnpublished(user, mediaType) {
-            console.log('User unpublished:', user.uid, mediaType);
-            if (mediaType === 'video') {
-                delete remoteUsers[user.uid];
-                updateUserCount();
-            }
-        }
-        
-        function handleUserJoined(user) {
-            console.log('User joined:', user.uid);
-            document.getElementById('callStatus').textContent = 'Other person connected ✅';
-            updateUserCount();
-        }
-        
-        function handleUserLeft(user) {
-            console.log('User left:', user.uid);
-            delete remoteUsers[user.uid];
-            updateUserCount();
-            document.getElementById('callStatus').textContent = 'Other person left';
-        }
-        
-        function updateUserCount() {
-            const count = Object.keys(remoteUsers).length + 1;
-            document.getElementById('userCount').textContent = '👤 ' + count;
-        }
-        
-        // ==================== MUTE / UNMUTE ====================
         
         async function toggleMute() {
             if (!localAudioTrack) return;
-            
             isMuted = !isMuted;
             const btn = document.getElementById('muteBtn');
-            
+            await localAudioTrack.setEnabled(!isMuted);
             if (isMuted) {
-                await localAudioTrack.setEnabled(false);
                 btn.classList.add('active');
                 btn.textContent = '🔇';
             } else {
-                await localAudioTrack.setEnabled(true);
                 btn.classList.remove('active');
                 btn.textContent = '🎤';
             }
         }
         
-        // ==================== VIDEO ON/OFF ====================
-        
         async function toggleVideo() {
             if (!localVideoTrack) return;
-            
             isVideoOff = !isVideoOff;
             const btn = document.getElementById('videoBtn');
             const localVideo = document.getElementById('local-video');
-            
+            await localVideoTrack.setEnabled(!isVideoOff);
             if (isVideoOff) {
-                await localVideoTrack.setEnabled(false);
                 btn.classList.add('active');
                 btn.textContent = '📷';
                 localVideo.style.display = 'none';
             } else {
-                await localVideoTrack.setEnabled(true);
                 btn.classList.remove('active');
                 btn.textContent = '📹';
                 localVideo.style.display = 'block';
             }
         }
         
-        // ==================== SWITCH CAMERA ====================
-        
         async function switchCamera() {
             if (!localVideoTrack) return;
-            
             facingMode = facingMode === 'user' ? 'environment' : 'user';
             
-            // Stop current video track
             localVideoTrack.stop();
             localVideoTrack.close();
             
-            // Create new video track with switched camera
             localVideoTrack = await AgoraRTC.createCameraVideoTrack({
                 facingMode: facingMode,
                 encoderConfig: '720p'
             });
             
-            // Replace published track
             await client.unpublish([localVideoTrack]);
-            
-            // Play local video
             localVideoTrack.play('local-video');
             
-            // If video was off, keep it off
             if (isVideoOff) {
                 await localVideoTrack.setEnabled(false);
                 document.getElementById('local-video').style.display = 'none';
             }
             
-            // Publish new track
             await client.publish([localVideoTrack]);
         }
-        
-        // ==================== TIMER ====================
         
         function startTimer() {
             callStartTime = Date.now();
             timerInterval = setInterval(() => {
                 const elapsed = Math.floor((Date.now() - callStartTime) / 1000);
-                const minutes = Math.floor(elapsed / 60).toString().padStart(2, '0');
-                const seconds = (elapsed % 60).toString().padStart(2, '0');
-                document.getElementById('callTimer').textContent = minutes + ':' + seconds;
+                const min = Math.floor(elapsed / 60).toString().padStart(2, '0');
+                const sec = (elapsed % 60).toString().padStart(2, '0');
+                document.getElementById('callTimer').textContent = min + ':' + sec;
             }, 1000);
         }
         
-        function stopTimer() {
-            if (timerInterval) {
-                clearInterval(timerInterval);
-                timerInterval = null;
-            }
-        }
-        
-        // ==================== END CALL ====================
-        
         async function endCall() {
             if (!confirm('End this call?')) return;
+            clearInterval(timerInterval);
+            if (localAudioTrack) { localAudioTrack.stop(); localAudioTrack.close(); }
+            if (localVideoTrack) { localVideoTrack.stop(); localVideoTrack.close(); }
+            if (client) await client.leave();
             
-            stopTimer();
-            
-            // Leave channel
-            if (client) {
-                await client.leave();
-            }
-            
-            // Stop local tracks
-            if (localAudioTrack) {
-                localAudioTrack.stop();
-                localAudioTrack.close();
-            }
-            if (localVideoTrack) {
-                localVideoTrack.stop();
-                localVideoTrack.close();
-            }
-            
-            // Update appointment
             if (appointmentId) {
                 db.collection('appointments').doc(appointmentId).update({
                     status: 'completed',
                     callType: 'video',
                     endedAt: firebase.firestore.FieldValue.serverTimestamp()
-                }).catch(e => console.error('Update error:', e));
+                }).catch(e => {});
             }
             
             window.location.href = 'doctor-dashboard.html';
         }
         
-        // Cleanup on page leave
-        window.addEventListener('beforeunload', async () => {
-            stopTimer();
-            if (client) await client.leave();
-            if (localAudioTrack) { localAudioTrack.stop(); localAudioTrack.close(); }
-            if (localVideoTrack) { localVideoTrack.stop(); localVideoTrack.close(); }
-        });
-        
-        // Start!
         initCall();
     </script>
 </body>
