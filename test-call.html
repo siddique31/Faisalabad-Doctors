@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Test Call</title>
+    <title>Test Call - Gojra Doctors</title>
     <style>
-        body { margin: 0; padding: 0; height: 100vh; }
+        body { margin: 0; padding: 0; height: 100vh; background: #000; }
         #jitsi { width: 100%; height: 100%; }
     </style>
 </head>
@@ -15,12 +15,21 @@
     <script>
         const domain = 'meet.jit.si';
         const options = {
-            roomName: 'GojraTest123',
+            roomName: 'GojraTestRoom123',
             width: '100%',
             height: '100%',
-            parentNode: document.getElementById('jitsi')
+            parentNode: document.getElementById('jitsi'),
+            configOverwrite: {
+                startWithAudioMuted: false,
+                startWithVideoMuted: false,
+            },
+            interfaceConfigOverwrite: {
+                SHOW_JITSI_WATERMARK: false,
+                TOOLBAR_BUTTONS: ['microphone', 'camera', 'hangup', 'chat'],
+            }
         };
-        new JitsiMeetExternalAPI(domain, options);
+        const api = new JitsiMeetExternalAPI(domain, options);
+        console.log('Jitsi loaded successfully!');
     </script>
 </body>
 </html>
